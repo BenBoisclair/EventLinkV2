@@ -1,0 +1,276 @@
+<script setup lang="ts">
+import BlockButton from "@/Components/UI/BlockButton.vue";
+import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
+import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
+import type { CountdownBlockProps } from "@/types/blocks";
+import type { Event } from "@/types/event";
+import type { DeviceType } from "@/types/websiteBuilder";
+import { getContrastingTextColor } from "@/utils/color";
+import {
+    computed,
+    onMounted,
+    onUnmounted,
+    ref,
+    watch,
+    withDefaults,
+} from "vue";
+import BlockTitle from "../BlockTitle.vue";
+
+const props = withDefaults(
+    defineProps<
+        CountdownBlockProps & {
+            isEditorMode?: boolean;
+            device?: DeviceType;
+            useEventDates: boolean;
+            event?: Event;
+            showDays?: boolean;
+            showHours?: boolean;
+            showMinutes?: boolean;
+            showSeconds?: boolean;
+            finishedText?: string;
+            buttonText?: string;
+            buttonLink?: string;
+            buttonTextColor?: string;
+            buttonBackgroundColor?: string;
+            buttonEnabled?: boolean;
+        }
+    >(),
+    {
+        title: "Countdown",
+        backgroundColor: undefined,
+        textColor: undefined,
+        startDate: undefined,
+        endDate: undefined,
+        useEventDates: false,
+        isEditorMode: false,
+        device: "desktop",
+        event: undefined,
+        showDays: true,
+        showHours: true,
+        showMinutes: true,
+        showSeconds: true,
+        finishedText: "Event has started! 🎉",
+        buttonText: "",
+        buttonLink: "",
+        buttonTextColor: "#FFFFFF",
+        buttonBackgroundColor: undefined,
+        buttonEnabled: false,
+    }
+);
+
+const emit = defineEmits<{
+    (e: "delete", blockId: string): void;
+}>();
+
+const store = useWebsiteBuilderStore();
+
+// Color logic: use prop, else fallback to sensible default
+const computedBackgroundColor = computed(() => {
+    return props.backgroundColor || "#F5F5F5"; // fallback to light gray
+});
+
+const computedTextColor = computed(() => {
+    if (props.textColor) return props.textColor;
+    // Calculate contrast against effective background
+    const bgColor = computedBackgroundColor.value;
+    return getContrastingTextColor(bgColor);
+});
+
+const blockStyle = computed(() => ({
+    backgroundColor: computedBackgroundColor.value,
+}));
+
+const unitBackgroundStyle = computed(() => ({
+    backgroundColor: `${computedTextColor.value}20`,
+}));
+
+const computedButtonBackgroundColor = computed(() => {
+    return props.buttonBackgroundColor || "#222222"; // fallback to dark gray
+});
+
+const computedButtonTextColor = computed(() => {
+    if (props.buttonTextColor) return props.buttonTextColor;
+    // Calculate contrast against effective button background
+    const bgColor = computedButtonBackgroundColor.value;
+    return getContrastingTextColor(bgColor);
+});
+
+const timeLeft = ref({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+});
+
+const isCountdownFinished = computed(() => {
+    return (
+        timeLeft.value.days === 0 &&
+        timeLeft.value.hours === 0 &&
+        timeLeft.value.minutes === 0 &&
+        timeLeft.value.seconds === 0
+    );
+});
+
+let countdownInterval: number | null = null;
+
+const calculateTimeLeft = () => {
+    const now = new Date();
+    let start: Date | null = null;
+
+    if (props.useEventDates && props.event) {
+        start = props.event.start_date
+            ? new Date(props.event.start_date)
+            : null;
+    } else {
+        start = props.startDate ? new Date(props.startDate) : null;
+    }
+
+    if (!start) {
+        timeLeft.value = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+        if (countdownInterval) clearInterval(countdownInterval);
+        return;
+    }
+
+    const difference = start.getTime() - now.getTime();
+
+    if (difference > 0) {
+        timeLeft.value = {
+            days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+            minutes: Math.floor((difference / 1000 / 60) % 60),
+            seconds: Math.floor((difference / 1000) % 60),
+        };
+    } else {
+        timeLeft.value = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+        if (countdownInterval) clearInterval(countdownInterval);
+    }
+};
+
+const handleEditClick = () => {
+    if (!props.id) return;
+    store.beginEditingBlock(props.id);
+};
+
+const handleDelete = () => {
+    if (!props.id) return;
+    emit("delete", props.id);
+};
+
+onMounted(() => {
+    calculateTimeLeft();
+    countdownInterval = window.setInterval(calculateTimeLeft, 1000);
+});
+
+onUnmounted(() => {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+    }
+});
+
+watch(
+    [
+        () => props.startDate,
+        () => props.endDate,
+        () => props.useEventDates,
+        () => props.event?.start_date,
+        () => props.event?.end_date,
+    ],
+    calculateTimeLeft
+);
+</script>
+
+<template>
+    <BlockContainer
+        :id="props.id"
+        :style="blockStyle"
+        :isEditorMode="props.isEditorMode"
+        @delete="handleDelete"
+        @edit="handleEditClick"
+        class="flex min-h-[300px] flex-col items-center justify-center"
+    >
+        <div
+            class="container w-full px-4 mx-auto"
+            :style="{ color: computedTextColor }"
+        >
+            <BlockTitle
+                v-if="!isCountdownFinished"
+                :title="props.title"
+                :title-color="computedTextColor"
+                tag="h2"
+                text-align="center"
+                default-classes="mb-6 text-2xl font-bold md:mb-8 md:text-3xl"
+            />
+            <div
+                v-if="!isCountdownFinished"
+                class="flex flex-wrap items-center justify-center gap-3 text-center sm:gap-4"
+            >
+                <!-- Days -->
+                <div
+                    v-if="props.showDays"
+                    class="p-3 rounded-lg min-w-20 sm:p-4"
+                    :style="unitBackgroundStyle"
+                >
+                    <div class="text-3xl font-bold sm:text-4xl">
+                        {{ timeLeft.days }}
+                    </div>
+                    <div class="text-xs sm:text-sm">Days</div>
+                </div>
+                <!-- Hours -->
+                <div
+                    v-if="props.showHours"
+                    class="p-3 rounded-lg min-w-20 sm:p-4"
+                    :style="unitBackgroundStyle"
+                >
+                    <div class="text-3xl font-bold sm:text-4xl">
+                        {{ timeLeft.hours }}
+                    </div>
+                    <div class="text-xs sm:text-sm">Hours</div>
+                </div>
+                <!-- Minutes -->
+                <div
+                    v-if="props.showMinutes"
+                    class="p-3 rounded-lg min-w-20 sm:p-4"
+                    :style="unitBackgroundStyle"
+                >
+                    <div class="text-3xl font-bold sm:text-4xl">
+                        {{ timeLeft.minutes }}
+                    </div>
+                    <div class="text-xs sm:text-sm">Minutes</div>
+                </div>
+                <!-- Seconds -->
+                <div
+                    v-if="props.showSeconds"
+                    class="p-3 rounded-lg min-w-20 sm:p-4"
+                    :style="unitBackgroundStyle"
+                >
+                    <div class="text-3xl font-bold sm:text-4xl">
+                        {{ timeLeft.seconds }}
+                    </div>
+                    <div class="text-xs sm:text-sm">Seconds</div>
+                </div>
+            </div>
+            <div v-else class="text-2xl font-semibold text-center md:text-3xl">
+                {{ props.finishedText }}
+            </div>
+            <!-- Customizable Button -->
+            <div
+                v-if="
+                    props.buttonEnabled &&
+                    props.buttonText &&
+                    props.buttonLink &&
+                    !isCountdownFinished
+                "
+                class="flex justify-center mt-6"
+            >
+                <BlockButton
+                    :text="props.buttonText"
+                    :href="props.buttonLink"
+                    :color="computedButtonBackgroundColor"
+                    :textColor="computedButtonTextColor"
+                    variant="primary"
+                    class="px-5 py-2.5 text-base font-bold md:px-6 md:py-3"
+                />
+            </div>
+        </div>
+    </BlockContainer>
+</template>

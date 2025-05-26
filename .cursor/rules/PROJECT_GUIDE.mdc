@@ -1,0 +1,13 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# PROJECT_GUIDE
+
+## Collaboration Rules
+
+1. When presented with a problem or request, always return a step-by-step plan first.
+2. Ask for user confirmation before proceeding with any plan or action.
+3. Think through problems step by step, ensuring clarity and thoroughness.
+4. When working with a library or package, use available context to search for and reference its documentation before implementation.

@@ -1,0 +1,20 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# tech.mdc
+
+## Project Architecture Overview
+
+This project is a web application built with a Laravel back end and a Vue.js front end. The architecture and technology stack are as follows:
+
+- **Backend:** Laravel (PHP framework), using Laravel Jetstream as the starter kit for authentication and scaffolding.
+- **Frontend:** Vue.js for interactive UI components, integrated with Inertia.js to provide a modern single-page application (SPA) experience.
+- **Styling:** Tailwind CSS is used for utility-first, responsive styling across the application.
+- **File Storage:** AWS S3 is used for storing and serving images and other uploaded assets.
+- **Deployment:** The application is deployed using Inertia.js for SPA routing and rendering, and is hosted on a DigitalOcean droplet, which serves both the application and the database.
+- **Database:** The database is hosted on the same DigitalOcean droplet as the application server.
+- **LOCAL SERVER**: pnpm
+
+This stack provides a robust, scalable, and modern web application foundation, leveraging Laravel's backend capabilities with a rich, reactive Vue.js front end.
