@@ -7,9 +7,9 @@ import { computed, ref, watch, onMounted, onUnmounted } from "vue";
 import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import PublishButton from "@/Components/WebsiteBuilder/Components/PublishButton.vue";
 import ShareButton from "@/Components/WebsiteBuilder/Components/ShareButton.vue";
-import { useSaveState } from "@/composables/useSaveState";
-import { usePublishState } from "@/composables/usePublishState";
-import { useShareUrl } from "@/composables/useShareUrl";
+import { useSaveState } from "@/Composables/useSaveState";
+import { usePublishState } from "@/Composables/usePublishState";
+import { useShareUrl } from "@/Composables/useShareUrl";
 
 const websiteBuilderStore = useWebsiteBuilderStore();
 

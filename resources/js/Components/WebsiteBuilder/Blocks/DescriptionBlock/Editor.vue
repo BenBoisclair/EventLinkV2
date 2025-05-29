@@ -4,7 +4,7 @@ import InputLabel from "@/Components/Forms/InputLabel.vue";
 import Textarea from "@/Components/Forms/Textarea.vue";
 import Section from "@/Components/UI/Section.vue";
 import type { DescriptionBlockProps } from "@/types/blocks";
-import { useBlockEditor } from "@/composables/useBlockEditor";
+import { useBlockEditor } from "@/Composables/useBlockEditor";
 import { type PropType } from "vue";
 
 const props = defineProps({

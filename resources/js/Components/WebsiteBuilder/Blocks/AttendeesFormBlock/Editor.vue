@@ -8,7 +8,7 @@ import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import IconButton from "@/Components/UI/IconButton.vue";
 import Section from "@/Components/UI/Section.vue";
 import type { AttendeesFormBlockProps } from "@/types/blocks";
-import { useBlockEditor } from "@/composables/useBlockEditor";
+import { useBlockEditor } from "@/Composables/useBlockEditor";
 import { ref, type PropType } from "vue";
 
 const props = defineProps({

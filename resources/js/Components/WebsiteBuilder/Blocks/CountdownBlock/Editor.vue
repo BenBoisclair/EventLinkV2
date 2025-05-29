@@ -6,7 +6,7 @@ import Checkbox from "@/Components/UI/Checkbox.vue";
 import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import Section from "@/Components/UI/Section.vue";
 import type { CountdownBlockProps } from "@/types/blocks";
-import { useBlockEditor } from "@/composables/useBlockEditor";
+import { useBlockEditor } from "@/Composables/useBlockEditor";
 import { type PropType } from "vue";
 
 const props = defineProps({
