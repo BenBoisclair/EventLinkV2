@@ -1,14 +1,12 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import ActionSection from '@/Components/ActionSection.vue';
-import ConfirmsPassword from '@/Components/ConfirmsPassword.vue';
-import DangerButton from '@/Components/DangerButton.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import ActionSection from '@/Components/UI/ActionSection.vue';
+import ConfirmsPassword from '@/Components/UI/ConfirmsPassword.vue';
+import Button from '@/Components/UI/Button.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import InputLabel from '@/Components/Forms/InputLabel.vue';
+import TextInput from '@/Components/Forms/Input.vue';
 
 const props = defineProps({
     requiresConfirmation: Boolean,
@@ -190,15 +188,15 @@ const disableTwoFactorAuthentication = () => {
             <div class="mt-5">
                 <div v-if="! twoFactorEnabled">
                     <ConfirmsPassword @confirmed="enableTwoFactorAuthentication">
-                        <PrimaryButton type="button" :class="{ 'opacity-25': enabling }" :disabled="enabling">
+                        <Button type="button" :class="{ 'opacity-25': enabling }" :disabled="enabling">
                             Enable
-                        </PrimaryButton>
+                        </Button>
                     </ConfirmsPassword>
                 </div>
 
                 <div v-else>
                     <ConfirmsPassword @confirmed="confirmTwoFactorAuthentication">
-                        <PrimaryButton
+                        <Button
                             v-if="confirming"
                             type="button"
                             class="me-3"
@@ -206,45 +204,49 @@ const disableTwoFactorAuthentication = () => {
                             :disabled="enabling"
                         >
                             Confirm
-                        </PrimaryButton>
+                        </Button>
                     </ConfirmsPassword>
 
                     <ConfirmsPassword @confirmed="regenerateRecoveryCodes">
-                        <SecondaryButton
+                        <Button
                             v-if="recoveryCodes.length > 0 && ! confirming"
                             class="me-3"
+                            variant="secondary"
                         >
                             Regenerate Recovery Codes
-                        </SecondaryButton>
+                        </Button>
                     </ConfirmsPassword>
 
                     <ConfirmsPassword @confirmed="showRecoveryCodes">
-                        <SecondaryButton
+                        <Button
                             v-if="recoveryCodes.length === 0 && ! confirming"
                             class="me-3"
+                            variant="secondary"
                         >
                             Show Recovery Codes
-                        </SecondaryButton>
+                        </Button>
                     </ConfirmsPassword>
 
                     <ConfirmsPassword @confirmed="disableTwoFactorAuthentication">
-                        <SecondaryButton
+                        <Button
                             v-if="confirming"
                             :class="{ 'opacity-25': disabling }"
                             :disabled="disabling"
+                            variant="secondary"
                         >
                             Cancel
-                        </SecondaryButton>
+                        </Button>
                     </ConfirmsPassword>
 
                     <ConfirmsPassword @confirmed="disableTwoFactorAuthentication">
-                        <DangerButton
+                        <Button
                             v-if="! confirming"
                             :class="{ 'opacity-25': disabling }"
                             :disabled="disabling"
+                            variant="danger"
                         >
                             Disable
-                        </DangerButton>
+                        </Button>
                     </ConfirmsPassword>
                 </div>
             </div>

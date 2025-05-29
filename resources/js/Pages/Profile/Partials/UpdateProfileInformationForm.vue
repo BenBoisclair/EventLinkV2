@@ -1,13 +1,12 @@
 <script setup>
 import { ref } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
-import ActionMessage from '@/Components/ActionMessage.vue';
-import FormSection from '@/Components/FormSection.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import ActionMessage from '@/Components/UI/ActionMessage.vue';
+import FormSection from '@/Components/UI/FormSection.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import InputLabel from '@/Components/Forms/InputLabel.vue';
+import Button from '@/Components/UI/Button.vue';
+import TextInput from '@/Components/Forms/Input.vue';
 
 const props = defineProps({
     user: Object,
@@ -112,18 +111,19 @@ const clearPhotoFileInput = () => {
                     />
                 </div>
 
-                <SecondaryButton class="mt-2 me-2" type="button" @click.prevent="selectNewPhoto">
+                <Button class="mt-2 me-2" type="button" @click.prevent="selectNewPhoto" variant="secondary">
                     Select A New Photo
-                </SecondaryButton>
+                </Button>
 
-                <SecondaryButton
+                <Button
                     v-if="user.profile_photo_path"
                     type="button"
                     class="mt-2"
                     @click.prevent="deletePhoto"
+                    variant="secondary"
                 >
                     Remove Photo
-                </SecondaryButton>
+                </Button>
 
                 <InputError :message="form.errors.photo" class="mt-2" />
             </div>
@@ -182,9 +182,9 @@ const clearPhotoFileInput = () => {
                 Saved.
             </ActionMessage>
 
-            <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+            <Button :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                 Save
-            </PrimaryButton>
+            </Button>
         </template>
     </FormSection>
 </template>

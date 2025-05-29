@@ -1,8 +1,6 @@
 <script setup>
 import { ref } from "vue";
 import { useForm } from "@inertiajs/vue3";
-import ActionMessage from "@/Components/ActionMessage.vue";
-import SectionBorder from "@/Components/SectionBorder.vue";
 import Checkbox from "@/Components/UI/Checkbox.vue";
 import Modal from "@/Components/UI/Modal.vue";
 import Section from "@/Components/UI/Section.vue";
@@ -128,13 +126,6 @@ const deleteApiToken = () => {
             </template>
 
             <template #actions>
-                <ActionMessage
-                    :on="createApiTokenForm.recentlySuccessful"
-                    class="me-3"
-                >
-                    Created.
-                </ActionMessage>
-
                 <Button
                     :class="{ 'opacity-25': createApiTokenForm.processing }"
                     :disabled="createApiTokenForm.processing"
@@ -145,8 +136,6 @@ const deleteApiToken = () => {
         </Section>
 
         <div v-if="tokens.length > 0">
-            <SectionBorder />
-
             <!-- Manage API Tokens -->
             <div class="mt-10 sm:mt-0">
                 <Section>
