@@ -134,8 +134,7 @@ watch(
 
                 <div
                     v-else
-                    class="gap-4"
-                    class="grid grid-cols-3"
+                    class="grid grid-cols-3 gap-4"
                 >
                     <ExhibitorCard
                         v-for="exhibitor in exhibitors"
