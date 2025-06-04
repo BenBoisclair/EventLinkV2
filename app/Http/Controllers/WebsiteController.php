@@ -343,7 +343,18 @@ class WebsiteController extends Controller
         $incomingBlockIds = collect($incomingBlocks)->pluck('id')->filter()->all();
 
         if (!empty($incomingBlockIds)) {
-            $website->blocks()->whereNotIn('id', $incomingBlockIds)->delete();
+            // Filter to only numeric IDs since only persisted blocks have numeric database IDs
+            // New blocks have string IDs like "Stats-1749033341694" and don't exist in DB yet
+            $numericIds = collect($incomingBlockIds)->filter(function($id) {
+                return is_numeric($id);
+            })->all();
+            
+            if (!empty($numericIds)) {
+                $website->blocks()->whereNotIn('id', $numericIds)->delete();
+            } else {
+                // If no existing blocks are being kept, delete all existing blocks
+                $website->blocks()->delete();
+            }
         } else {
             $website->blocks()->delete();
         }
