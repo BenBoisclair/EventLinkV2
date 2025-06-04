@@ -315,7 +315,7 @@ class WebsiteController extends Controller
             'blocks.*.type' => 'required_with:blocks.*|string',
             'blocks.*.props' => 'nullable|array',
         ]);
-        
+
         // Dynamically validate any pending file fields
         $dynamicRules = [];
         foreach ($request->input('blocks', []) as $index => $block) {
@@ -327,7 +327,7 @@ class WebsiteController extends Controller
                 }
             }
         }
-        
+
         if (!empty($dynamicRules)) {
             $request->validate($dynamicRules);
         }
@@ -341,7 +341,7 @@ class WebsiteController extends Controller
     private function deleteRemovedBlocks(Website $website, array $incomingBlocks): void
     {
         $incomingBlockIds = collect($incomingBlocks)->pluck('id')->filter()->all();
-        
+
         if (!empty($incomingBlockIds)) {
             $website->blocks()->whereNotIn('id', $incomingBlockIds)->delete();
         } else {
@@ -355,20 +355,20 @@ class WebsiteController extends Controller
     private function preprocessBlockData(array $blockData, int $index, Request $request): array
     {
         $props = $blockData['props'] ?? [];
-        
+
         // Mark files as uploading and remove pending file entries
         foreach (array_keys($props) as $propName) {
             if (str_starts_with($propName, '_pendingFile_')) {
                 $targetPropName = str_replace('_pendingFile_', '', $propName);
                 $fileKey = "blocks.{$index}.props.{$propName}";
-                
+
                 if ($request->hasFile($fileKey)) {
                     $props["_{$targetPropName}_uploadingToS3"] = true;
                     unset($props[$propName]);
                 }
             }
         }
-        
+
         $blockData['props'] = $props;
         return $blockData;
     }
@@ -415,7 +415,7 @@ class WebsiteController extends Controller
 
         foreach ($pendingFiles as $targetPropName => $fileInfo) {
             $imageFile = $fileInfo['file'];
-            
+
             // Store temporarily on local disk
             $extension = $imageFile->getClientOriginalExtension();
             $randomString = substr(md5(uniqid()), 0, 8);
@@ -445,12 +445,12 @@ class WebsiteController extends Controller
     {
         $pendingFiles = [];
         $props = $blockData['props'] ?? [];
-        
+
         foreach (array_keys($props) as $propName) {
             if (str_starts_with($propName, '_pendingFile_')) {
                 $targetPropName = str_replace('_pendingFile_', '', $propName);
                 $fileKey = "blocks.{$index}.props.{$propName}";
-                
+
                 if ($request->hasFile($fileKey)) {
                     $pendingFiles[$targetPropName] = [
                         'file' => $request->file($fileKey),
@@ -459,7 +459,7 @@ class WebsiteController extends Controller
                 }
             }
         }
-        
+
         return $pendingFiles;
     }
 
@@ -473,7 +473,7 @@ class WebsiteController extends Controller
                 $props[$key] = $value === 'true';
             }
         }
-        
+
         return $props;
     }
 

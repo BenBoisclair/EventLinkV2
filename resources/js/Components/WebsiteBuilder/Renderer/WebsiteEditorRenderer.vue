@@ -1,0 +1,132 @@
+<script setup lang="ts">
+import { getBlockComponent } from "@/utils/blockRegistry";
+import { buildBlockProps } from "@/utils/blockPropsBuilder";
+import { extractWebsiteId } from "@/utils/websiteHelpers";
+import type { Block } from "@/types/websiteBuilder";
+import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
+import { usePage } from "@inertiajs/vue3";
+import { computed, ref, StyleValue } from "vue";
+import { storeToRefs } from "pinia";
+import type { EventType } from "@/types/event";
+import Button from "@/Components/UI/Button.vue";
+
+interface Props {
+    event?: EventType;
+}
+
+const props = defineProps<Props>();
+
+const websiteBuilderStore = useWebsiteBuilderStore();
+const { blocks, currentBlockId, editingBlockProps, previewDevice } =
+    storeToRefs(websiteBuilderStore);
+
+const effectiveDevice = computed(() => previewDevice.value || "desktop");
+
+// Track which block is being hovered
+const hoveredBlockId = ref<string | null>(null);
+
+const handleBlockMouseEnter = (blockId: string) => {
+    hoveredBlockId.value = blockId;
+};
+
+const handleBlockMouseLeave = () => {
+    hoveredBlockId.value = null;
+};
+
+const prepareBlockProps = (block: Block) => {
+    return buildBlockProps(
+        block,
+        currentBlockId.value,
+        editingBlockProps.value,
+        true, // Always in editor mode
+        effectiveDevice.value,
+        props.event,
+        extractWebsiteId(usePage().props)
+    );
+};
+
+const handleDeleteBlock = (blockId: string) => {
+    websiteBuilderStore.deleteBlock(blockId);
+};
+
+const handleUpdateBlock = (blockId: string, newProps: Record<string, any>) => {
+    websiteBuilderStore.updateBlock(blockId, newProps);
+};
+
+// Get selected font from store settings
+const selectedFont = computed(() => {
+    return websiteBuilderStore.websiteSettings?.design?.selectedFont || "Inter";
+});
+
+const rendererStyle = computed((): StyleValue => {
+    return {
+        fontFamily: selectedFont.value
+            ? `"${selectedFont.value}", sans-serif`
+            : "sans-serif",
+    };
+});
+</script>
+
+<template>
+    <div class="flex flex-col min-h-full bg-white" :style="rendererStyle">
+        <div class="flex-1">
+            <div
+                v-if="!blocks || blocks.length === 0"
+                class="flex min-h-[500px] flex-1 items-center justify-center p-6"
+            >
+                <div class="text-center text-gray-500">
+                    <p class="mb-4 text-sm font-medium text-primary">
+                        Nothing here yet. Add content using the editor.
+                    </p>
+                </div>
+            </div>
+            <div v-else class="w-full">
+                <template v-for="block in blocks" :key="block.id">
+                    <div
+                        class="relative"
+                        :class="{
+                            'ring-4 ring-purple-500 rounded-sm overflow-hidden z-50':
+                                currentBlockId === block.id,
+                        }"
+                        @mouseenter="handleBlockMouseEnter(block.id)"
+                        @mouseleave="handleBlockMouseLeave"
+                    >
+                        <component
+                            :is="getBlockComponent(block.type)"
+                            v-bind="prepareBlockProps(block)"
+                            @delete="handleDeleteBlock"
+                            @updateBlock="handleUpdateBlock"
+                        />
+
+                        <!-- Editor controls overlay -->
+                        <div
+                            v-if="hoveredBlockId === block.id"
+                            class="absolute z-50 pointer-events-none top-4 left-4"
+                        >
+                            <div class="flex gap-2">
+                                <Button
+                                    @click="
+                                        websiteBuilderStore.beginEditingBlock(
+                                            block.id
+                                        )
+                                    "
+                                    variant="primary"
+                                    size="sm"
+                                    title="Edit block"
+                                    class="shadow-lg pointer-events-auto"
+                                >
+                                    <v-icon
+                                        icon="$squareEditOutline"
+                                        size="small"
+                                        class="mr-1"
+                                    />
+                                    Edit
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

@@ -103,7 +103,7 @@ const handleAllEventsClick = () => {
                         >
                             {{ event.name }}
                         </v-list-item-title>
-                        <v-list-item-subtitle
+                        <!-- <v-list-item-subtitle
                             class="text-xs"
                             :class="{
                                 'text-blue-600 dark:text-blue-300':
@@ -113,7 +113,7 @@ const handleAllEventsClick = () => {
                             }"
                         >
                             {{ event.venue || "No venue set" }}
-                        </v-list-item-subtitle>
+                        </v-list-item-subtitle> -->
                     </v-list-item>
                 </div>
             </div>

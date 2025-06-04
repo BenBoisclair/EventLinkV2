@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { ExhibitorShowcaseBlockProps } from "@/types/blocks";
 import type { Exhibitor } from "@/types/exhibitor";
-import type { DeviceType } from "@/types/websiteBuilder";
 import axios from "axios";
 import { onMounted, ref, watch } from "vue";
 import { route } from "ziggy-js";
@@ -13,8 +11,6 @@ import BlockTitle from "../BlockTitle.vue";
 
 interface Props extends ExhibitorShowcaseBlockProps {
     id: string;
-    isEditorMode?: boolean;
-    device?: DeviceType;
     event?: {
         id: number;
         name?: string;
@@ -22,24 +18,13 @@ interface Props extends ExhibitorShowcaseBlockProps {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    isEditorMode: false,
-    device: "desktop",
     title: "Meet Our Exhibitors",
     titleColor: "#000000",
     backgroundColor: "#FFFFFF",
     event: undefined,
 });
 
-const emit = defineEmits<{
-    (e: "delete", blockId: string): void;
-    (
-        e: "updateBlock",
-        blockId: string,
-        newProps: Partial<ExhibitorShowcaseBlockProps>
-    ): void;
-}>();
 
-const store = useWebsiteBuilderStore();
 
 const exhibitors = ref<Exhibitor[]>([]);
 const loading = ref(false);
@@ -95,8 +80,6 @@ const openExhibitorModal = (exhibitor: Exhibitor) => {
 onMounted(() => {
     if (props.event?.id) {
         fetchExhibitors(props.event.id);
-    } else if (props.isEditorMode) {
-        error.value = "Link an event to display exhibitors.";
     }
 });
 
@@ -105,32 +88,18 @@ watch(
     (newEventId, oldEventId) => {
         if (newEventId && newEventId !== oldEventId) {
             fetchExhibitors(newEventId);
-        } else if (!newEventId && props.isEditorMode) {
-            error.value = "Link an event to display exhibitors.";
+        } else if (!newEventId) {
             exhibitors.value = [];
         }
     },
     { immediate: false }
 );
 
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
-
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
 </script>
 
 <template>
     <BlockContainer
-        :id="props.id"
         :background-color="props.backgroundColor ?? ''"
-        :is-editor-mode="props.isEditorMode"
-        @delete="handleDelete"
-        @edit="handleEditClick"
     >
         <div class="px-4 py-16 sm:px-6 lg:px-8">
             <BlockTitle
@@ -166,10 +135,7 @@ const handleEditClick = () => {
                 <div
                     v-else
                     class="gap-4"
-                    :class="{
-                        'flex flex-col items-center': props.device === 'mobile',
-                        'grid grid-cols-3': props.device !== 'mobile',
-                    }"
+                    class="grid grid-cols-3"
                 >
                     <ExhibitorCard
                         v-for="exhibitor in exhibitors"

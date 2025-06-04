@@ -24,6 +24,8 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
     const currentBlockId = ref<string | null>(null);
     const editingBlockProps = ref<any | null>(null);
     const lastUpdatedAt = ref<string | null>(null);
+    const autoSaveInterval = ref<number | null>(null);
+    const showSavedMessage = ref<boolean>(false);
     const currentBlockType = computed(() => {
         if (!currentBlockId.value) return null;
         const block = blocks.value.find((b) => b.id === currentBlockId.value);
@@ -31,6 +33,30 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
     });
 
     // --- Actions ---
+
+    /**
+     * Starts auto-save functionality that saves every 1 minute if there are unsaved changes.
+     */
+    function startAutoSave() {
+        stopAutoSave(); // Clear any existing interval
+        
+        autoSaveInterval.value = window.setInterval(async () => {
+            if (isDirty.value && saveState.value !== "saving") {
+                console.log("Auto-saving website...");
+                await saveWebsite();
+            }
+        }, 60000); // 60 seconds = 1 minute
+    }
+
+    /**
+     * Stops auto-save functionality.
+     */
+    function stopAutoSave() {
+        if (autoSaveInterval.value) {
+            clearInterval(autoSaveInterval.value);
+            autoSaveInterval.value = null;
+        }
+    }
 
     /**
      * Initializes the builder with data from backend or defaults.
@@ -54,6 +80,7 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         saveError.value = null;
         undoStack.value = [];
         redoStack.value = [];
+        startAutoSave();
     }
 
     /**
@@ -124,9 +151,13 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
             }
             saveState.value = "saved";
             isDirty.value = false;
+            showSavedMessage.value = true;
             setTimeout(() => {
                 if (saveState.value === "saved") saveState.value = "idle";
             }, 1200);
+            setTimeout(() => {
+                showSavedMessage.value = false;
+            }, 3000);
             return true;
         } catch (error: any) {
             saveError.value = error?.message || "Failed to save website.";
@@ -315,6 +346,8 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         editingBlockProps,
         lastUpdatedAt,
         currentBlockType,
+        autoSaveInterval,
+        showSavedMessage,
 
         // Actions
         initializeBuilder,
@@ -332,5 +365,7 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         saveBlock,
         discardBlock,
         handleBlockImageProcessed,
+        startAutoSave,
+        stopAutoSave,
     };
 });

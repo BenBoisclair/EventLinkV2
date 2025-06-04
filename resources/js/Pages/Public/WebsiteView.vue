@@ -2,13 +2,7 @@
 import WebsiteRenderer from '@/Components/WebsiteBuilder/Renderer/WebsiteRenderer.vue';
 import type { HeroBlockProps } from '@/types/blocks';
 import { Event } from '@/types/event';
-import type {
-    Block,
-    ThemeColors,
-    ThemeOptions,
-    Widget,
-} from '@/types/websiteBuilder';
-import { createDefaultThemes } from '@/utils/themes';
+import type { Block } from '@/types/websiteBuilder';
 import Hotjar from '@hotjar/browser';
 import { useHead } from '@vueuse/head';
 import { computed, onMounted } from 'vue';
@@ -16,14 +10,8 @@ import { computed, onMounted } from 'vue';
 interface WebsiteData {
     id: string;
     settings: {
-        widgets?: Widget[];
-        colorTheme?: {
-            selectedTheme: ThemeOptions;
-            themes: Record<ThemeOptions, ThemeColors>;
-        };
         design?: {
             selectedFont: string;
-            // Add other design settings later if needed
         };
         metadata?: {
             title?: string;
@@ -37,18 +25,6 @@ interface WebsiteData {
 }
 
 const { website } = defineProps<{ website: WebsiteData }>();
-
-const widgets = computed(() => website.settings?.widgets || []);
-
-const colorTheme = computed(() => {
-    const themeData = website.settings?.colorTheme;
-    return (
-        themeData ?? {
-            selectedTheme: 'blue' as ThemeOptions,
-            themes: createDefaultThemes(),
-        }
-    );
-});
 
 const selectedFont = computed(() => {
     return website.settings?.design?.selectedFont || 'Inter'; // Default to Inter
@@ -173,10 +149,7 @@ onMounted(() => {
 <template>
     <WebsiteRenderer
         :blocks="blocks"
-        :widgets="widgets"
-        :color-theme="colorTheme"
         :event="eventForRenderer"
-        :is-editor-mode="false"
         :selected-font="selectedFont"
         class="min-h-screen"
     />

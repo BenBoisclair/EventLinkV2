@@ -138,14 +138,14 @@ export const blockDefaults: BlockDefaultsMap = {
         description: "Displays a list of event exhibitors.",
         icon: "BuildingStorefrontIcon",
     },
-    Canvas: {
-        component: "CanvasBlock",
-        props: {
-            canvasData: null,
-            device: "desktop" as DeviceType,
-        },
-        title: "Canvas Block",
-        description: "An interactive canvas for drawing.",
-        icon: "PaintBrushIcon",
-    },
+    // Canvas: {
+    //     component: "CanvasBlock",
+    //     props: {
+    //         canvasData: null,
+    //         device: "desktop" as DeviceType,
+    //     },
+    //     title: "Canvas Block",
+    //     description: "An interactive canvas for drawing.",
+    //     icon: "PaintBrushIcon",
+    // },
 };

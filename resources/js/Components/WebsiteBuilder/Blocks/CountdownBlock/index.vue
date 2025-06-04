@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import BlockButton from "@/Components/UI/BlockButton.vue";
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { CountdownBlockProps } from "@/types/blocks";
 import type { Event } from "@/types/event";
-import type { DeviceType } from "@/types/websiteBuilder";
 import { getContrastingTextColor } from "@/utils/color";
 import {
     computed,
@@ -19,8 +17,6 @@ import BlockTitle from "../BlockTitle.vue";
 const props = withDefaults(
     defineProps<
         CountdownBlockProps & {
-            isEditorMode?: boolean;
-            device?: DeviceType;
             useEventDates: boolean;
             event?: Event;
             showDays?: boolean;
@@ -42,8 +38,6 @@ const props = withDefaults(
         startDate: undefined,
         endDate: undefined,
         useEventDates: false,
-        isEditorMode: false,
-        device: "desktop",
         event: undefined,
         showDays: true,
         showHours: true,
@@ -58,11 +52,7 @@ const props = withDefaults(
     }
 );
 
-const emit = defineEmits<{
-    (e: "delete", blockId: string): void;
-}>();
 
-const store = useWebsiteBuilderStore();
 
 // Color logic: use prop, else fallback to sensible default
 const computedBackgroundColor = computed(() => {
@@ -146,15 +136,6 @@ const calculateTimeLeft = () => {
     }
 };
 
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
-
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
 
 onMounted(() => {
     calculateTimeLeft();
@@ -181,11 +162,7 @@ watch(
 
 <template>
     <BlockContainer
-        :id="props.id"
-        :style="blockStyle"
-        :isEditorMode="props.isEditorMode"
-        @delete="handleDelete"
-        @edit="handleEditClick"
+        :background-color="computedBackgroundColor"
         class="flex min-h-[300px] flex-col items-center justify-center"
     >
         <div

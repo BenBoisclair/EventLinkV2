@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { CanvasBlockProps } from "@/types/blocks";
-import type { DeviceType } from "@/types/websiteBuilder";
 import axios from "axios";
 import { debounce } from "lodash";
 import { onMounted, onUnmounted, ref, watch } from "vue";
@@ -16,14 +14,10 @@ declare global {
 const props = defineProps<
     CanvasBlockProps & {
         websiteId: string | number;
-        isEditorMode?: boolean;
-        device?: DeviceType;
     }
 >();
 
-const emit = defineEmits<{ (e: "delete", blockId: string): void }>();
 
-const store = useWebsiteBuilderStore();
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const isDrawing = ref(false);
 const lastX = ref(0);
@@ -45,15 +39,6 @@ const availableStrokeSizes = ref([1, 3, 5]); // Small, Medium, Large
 const selectedStrokeSize = ref(availableStrokeSizes.value[1]);
 // --- End New State ---
 
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
-
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
 
 const getContext = (): CanvasRenderingContext2D | null => {
     return canvasRef.value?.getContext("2d") || null;
@@ -130,7 +115,6 @@ const getCoordinates = (
 };
 
 const debouncedSaveCanvasStateToBackend = debounce(async () => {
-    if (props.isEditorMode) return;
 
     const canvas = canvasRef.value;
     console.log("Checking save conditions:", {
@@ -217,9 +201,7 @@ onMounted(() => {
     }
 
     // Use global Echo instance
-    if (!props.isEditorMode) {
-        listenForCanvasUpdates();
-    }
+    listenForCanvasUpdates();
 });
 
 onUnmounted(() => {
@@ -254,13 +236,12 @@ watch(
 const listenForCanvasUpdates = () => {
     // Check if window.Echo is available
     if (
-        props.isEditorMode ||
         !props.id ||
         typeof window === "undefined" ||
         !window.Echo
     ) {
         console.warn(
-            "Echo not available or in editor mode, not listening for canvas updates."
+            "Echo not available, not listening for canvas updates."
         );
         return;
     }
@@ -329,10 +310,6 @@ const stopListeningForCanvasUpdates = () => {
 
 <template>
     <BlockContainer
-        :id="props.id ?? ''"
-        :is-editor-mode="props.isEditorMode"
-        @edit="handleEditClick"
-        @delete="handleDelete"
         class="relative flex max-h-[700px] items-center justify-center overflow-hidden p-0"
     >
         <canvas

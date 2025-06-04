@@ -2,7 +2,7 @@
 import ResizableHandle from "@/Components/UI/ResizableHandle.vue";
 import BuilderSidebar from "@/Components/WebsiteBuilder/Editor/BuilderSidebar.vue";
 import BuilderBar from "@/Components/WebsiteBuilder/Editor/BuilderBar.vue";
-import WebsiteRenderer from "@/Components/WebsiteBuilder/Renderer/WebsiteRenderer.vue";
+import WebsiteEditorRenderer from "@/Components/WebsiteBuilder/Renderer/WebsiteEditorRenderer.vue";
 import { useResizableSidebar } from "@/Composables/useResizableSidebar";
 import { useEventStore } from "@/stores/eventStore";
 import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
@@ -65,14 +65,6 @@ useWebsiteBuilderEcho(
     }
 );
 
-const handleDeleteBlock = (blockId: string) => {
-    websiteBuilderStore.deleteBlock(blockId);
-};
-
-const handleUpdateBlock = (blockId: string, newProps: Record<string, any>) => {
-    websiteBuilderStore.updateBlock(blockId, newProps);
-};
-
 const hasBlocks = computed(() => blocks.value.length > 0);
 </script>
 
@@ -98,17 +90,8 @@ const hasBlocks = computed(() => blocks.value.length > 0);
                             previewDevice === 'mobile' ? '667px' : 'auto',
                     }"
                 >
-                    <WebsiteRenderer
-                        :blocks="blocks"
-                        :is-editor-mode="true"
-                        :device="previewDevice"
-                        :editing-block-id="websiteBuilderStore.currentBlockId"
-                        :editing-block-props="
-                            websiteBuilderStore.editingBlockProps
-                        "
+                    <WebsiteEditorRenderer
                         :event="page.props.event"
-                        @delete-block="handleDeleteBlock"
-                        @update-block="handleUpdateBlock"
                         class="rounded-md shadow-lg"
                     />
                 </div>

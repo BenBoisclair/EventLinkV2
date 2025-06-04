@@ -1,30 +1,16 @@
 <script setup lang="ts">
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { StatsBlockProps } from "@/types/blocks";
-import type { DeviceType } from "@/types/websiteBuilder";
 import { computed } from "vue";
 
 const props = withDefaults(
-    defineProps<
-        StatsBlockProps & {
-            isEditorMode?: boolean;
-            device?: DeviceType;
-        }
-    >(),
+    defineProps<StatsBlockProps>(),
     {
         backgroundColor: undefined,
         textColor: "#FFFFFF",
-        isEditorMode: false,
-        device: "desktop",
     }
 );
 
-const emit = defineEmits<{
-    (e: "delete", blockId: string): void;
-}>();
-
-const store = useWebsiteBuilderStore();
 
 const blockStyle = computed(() => {
     return {
@@ -32,26 +18,13 @@ const blockStyle = computed(() => {
         color: props.textColor || "#FFFFFF",
     };
 });
-
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
-
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
 </script>
 
 <template>
     <BlockContainer
-        :id="props.id ?? ''"
-        :style="blockStyle"
-        :isEditorMode="props.isEditorMode"
-        @edit="handleEditClick"
-        @delete="handleDelete"
+        :background-color="props.backgroundColor"
         class="py-12 md:py-16"
+        :style="{ color: props.textColor || '#FFFFFF' }"
     >
         <div class="container px-4 mx-auto">
             <div

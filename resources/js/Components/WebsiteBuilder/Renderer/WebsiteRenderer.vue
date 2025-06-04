@@ -9,8 +9,6 @@ import { computed, StyleValue } from "vue";
 interface Props {
     blocks: Block[];
     selectedFont?: string;
-    isEditorMode?: boolean;
-    device?: "mobile" | "tablet" | "desktop";
     event?: {
         id: number;
         name?: string;
@@ -18,34 +16,22 @@ interface Props {
         end_date?: string;
         location?: string;
     };
-    editingBlockId?: string | null;
-    editingBlockProps?: Record<string, any> | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    eventName: "Event Website",
     blocks: () => [],
     selectedFont: "Inter",
-    isEditorMode: false,
     event: undefined,
-    editingBlockId: null,
-    editingBlockProps: null,
 });
 
-const effectiveDevice = computed(() => props.device || "desktop");
-
-const emit = defineEmits<{
-    (e: "deleteBlock", blockId: string): void;
-    (e: "updateBlock", blockId: string, newProps: Record<string, any>): void;
-}>();
 
 const prepareBlockProps = (block: Block) => {
     return buildBlockProps(
         block,
-        props.editingBlockId,
-        props.editingBlockProps,
-        props.isEditorMode || false,
-        effectiveDevice.value,
+        null, // No editing in display mode
+        null, // No editing props
+        false, // Not in editor mode
+        "desktop", // Always render for desktop in public view
         props.event,
         extractWebsiteId(usePage().props)
     );
@@ -59,7 +45,6 @@ const rendererStyle = computed((): StyleValue => {
     };
 });
 
-console.log(props.blocks);
 </script>
 
 <template>
@@ -80,11 +65,6 @@ console.log(props.blocks);
                     <component
                         :is="getBlockComponent(block.type)"
                         v-bind="prepareBlockProps(block)"
-                        @delete="$emit('deleteBlock', $event)"
-                        @updateBlock="
-                            (blockId, props) =>
-                                $emit('updateBlock', blockId, props)
-                        "
                     />
                 </template>
             </div>

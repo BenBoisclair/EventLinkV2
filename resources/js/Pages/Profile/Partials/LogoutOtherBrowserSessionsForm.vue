@@ -1,12 +1,11 @@
 <script setup>
 import { ref } from "vue";
 import { useForm } from "@inertiajs/vue3";
-import ActionSection from "@/Components/UI/ActionSection.vue";
+import Section from "@/Components/UI/Section.vue";
 import Modal from "@/Components/UI/Modal.vue";
 import InputError from "@/Components/Forms/InputError.vue";
 import Button from "@/Components/UI/Button.vue";
 import TextInput from "@/Components/Forms/Input.vue";
-import ActionMessage from "@/Components/UI/ActionMessage.vue";
 
 defineProps({
     sessions: Array,
@@ -42,7 +41,7 @@ const closeModal = () => {
 </script>
 
 <template>
-    <ActionSection>
+    <Section>
         <template #title> Browser Sessions </template>
 
         <template #description>
@@ -138,9 +137,9 @@ const closeModal = () => {
                     Log Out Other Browser Sessions
                 </Button>
 
-                <ActionMessage :on="form.recentlySuccessful" class="ms-3">
+                <!-- <ActionMessage :on="form.recentlySuccessful" class="ms-3">
                     Done.
-                </ActionMessage>
+                </ActionMessage> -->
             </div>
 
             <!-- Log Out Other Devices Confirmation Modal -->
@@ -171,9 +170,7 @@ const closeModal = () => {
                 </template>
 
                 <template #footer>
-                    <Button @click="closeModal" variant="secondary">
-                        Cancel
-                    </Button>
+                    <Button @click="closeModal"> Cancel </Button>
 
                     <Button
                         class="ms-3"
@@ -186,5 +183,5 @@ const closeModal = () => {
                 </template>
             </Modal>
         </template>
-    </ActionSection>
+    </Section>
 </template>

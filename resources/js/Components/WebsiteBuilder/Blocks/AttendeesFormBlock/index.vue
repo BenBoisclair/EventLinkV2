@@ -3,34 +3,21 @@ import BlockInput from "@/Components/Forms/BlockInput.vue";
 import BlockInputLabel from "@/Components/Forms/BlockInputLabel.vue";
 import BlockButton from "@/Components/UI/BlockButton.vue";
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { AttendeesFormBlockProps } from "@/types/blocks";
-import type { DeviceType } from "@/types/websiteBuilder";
 import { useForm, usePage } from "@inertiajs/vue3";
 import { computed, onMounted, ref, withDefaults, watch, reactive } from "vue";
 import BlockTitle from "../BlockTitle.vue";
 
 const props = withDefaults(
-    defineProps<
-        AttendeesFormBlockProps & {
-            isEditorMode?: boolean;
-            device?: DeviceType;
-        }
-    >(),
+    defineProps<AttendeesFormBlockProps>(),
     {
-        isEditorMode: false,
-        device: "desktop",
         title: "Register for the Event",
         buttonText: "Submit",
         backgroundColor: "transparent",
     }
 );
 
-const emit = defineEmits<{
-    (e: "delete", blockId: string): void;
-}>();
 
-const store = useWebsiteBuilderStore();
 const page = usePage();
 
 const backgroundStyle = computed(() => ({
@@ -68,23 +55,12 @@ let form: any = null;
 // Track submission success state
 const isSubmitted = ref(false);
 
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
-
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
+// Editor functionality is now handled by WebsiteEditorRenderer
 
 // Watch for field changes and update form data
 watch(enabledFields, updateFormData, { deep: true, immediate: true });
 
 const handleSubmit = () => {
-    if (props.isEditorMode) {
-        return;
-    }
 
     if (!props.id || !props.event?.id) {
         return;
@@ -129,12 +105,7 @@ const handleSubmit = () => {
 
 <template>
     <BlockContainer
-        :id="props.id ?? ''"
-        :style="backgroundStyle"
-        :is-editor-mode="props.isEditorMode"
-        :device="props.device"
-        @edit="handleEditClick"
-        @delete="handleDelete"
+        :background-color="props.backgroundColor || 'transparent'"
         class="py-12 md:py-16"
     >
         <div class="container px-8 mx-auto" id="register">
@@ -149,11 +120,11 @@ const handleSubmit = () => {
                 <p
                     v-if="
                         !enabledFields ||
-                        (enabledFields.length === 0 && isEditorMode)
+                        enabledFields.length === 0
                     "
                     class="italic text-center text-gray-500"
                 >
-                    No form fields configured. Add fields in the editor.
+                    No form fields configured.
                 </p>
                 <form
                     v-else
@@ -245,7 +216,6 @@ const handleSubmit = () => {
                         }"
                         :disabled="
                             form?.processing ||
-                            props.isEditorMode ||
                             isSubmitted
                         "
                         :loading="form?.processing"

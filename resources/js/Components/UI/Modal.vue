@@ -1,8 +1,9 @@
 <template>
     <div
         v-if="modelValue"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 min-h-screen min-w-full"
         @click.self="handleClickOutside"
+        style="top: 0; left: 0; right: 0; bottom: 0"
     >
         <div
             :class="[
@@ -37,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { withDefaults } from 'vue';
+import { withDefaults } from "vue";
 
 // Combine defineProps and withDefaults
 const props = withDefaults(
@@ -51,18 +52,18 @@ const props = withDefaults(
     }>(),
     {
         closeOnClickOutside: false,
-        maxWidth: 'max-w-[800px]', // Set default max-width
-        contentClass: '', // Default to empty string
+        maxWidth: "max-w-[800px]", // Set default max-width
+        contentClass: "", // Default to empty string
         contentBackgroundColor: undefined, // Default background color prop
-    },
+    }
 );
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: boolean): void;
+    (e: "update:modelValue", value: boolean): void;
 }>();
 
 const closeModal = () => {
-    emit('update:modelValue', false);
+    emit("update:modelValue", false);
 };
 
 const handleClickOutside = () => {

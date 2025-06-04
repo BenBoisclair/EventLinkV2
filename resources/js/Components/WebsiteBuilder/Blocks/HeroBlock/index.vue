@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { HeroBlockProps } from "@/types/blocks";
-import type { DeviceType } from "@/types/websiteBuilder";
 import { hexToRgba } from "@/utils/color";
 import { computed, withDefaults } from "vue";
 
@@ -10,43 +8,22 @@ const props = withDefaults(
     defineProps<
         HeroBlockProps & {
             websiteId: string | number;
-            isEditorMode?: boolean;
-            device?: DeviceType;
         }
     >(),
     {
-        isEditorMode: false,
-        device: "desktop",
         textPosition: "middle",
         overlayEnabled: false,
         overlayColor: "#000000",
     }
 );
 
-const emit = defineEmits<{
-    (e: "delete", blockId: string): void;
-}>();
 
-const store = useWebsiteBuilderStore();
-
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
-
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
 
 const showImage = computed(() => !!props.imageUrl);
 
 const backgroundStyle = computed(() => {
     if (!showImage.value && props.backgroundColor) {
         return { backgroundColor: props.backgroundColor };
-    }
-    if (!showImage.value && !props.backgroundColor && props.isEditorMode) {
-        return { backgroundColor: "#F3F4F6" };
     }
     return {};
 });
@@ -96,10 +73,7 @@ const descriptionStyle = computed(() => {
 
 <template>
     <BlockContainer
-        :id="props.id ?? ''"
-        :is-editor-mode="props.isEditorMode"
-        @edit="handleEditClick"
-        @delete="handleDelete"
+        :background-color="props.backgroundColor"
         class="relative p-0"
     >
         <div
@@ -124,12 +98,6 @@ const descriptionStyle = computed(() => {
                 :style="overlayStyle"
             ></div>
 
-            <div
-                v-if="
-                    !showImage && !props.backgroundColor && props.isEditorMode
-                "
-                class="flex items-center justify-center w-full h-full"
-            ></div>
 
             <div
                 v-if="props.headingText || props.descriptionText"
