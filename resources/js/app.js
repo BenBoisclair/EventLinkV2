@@ -144,6 +144,7 @@ const vuetify = createVuetify({
             tablet: mdiTablet,
             ticketOutline: mdiTicketOutline,
             trashCanOutline: mdiTrashCanOutline,
+            trash: mdiTrashCanOutline, // Alias for backward compatibility
             undo: mdiUndo,
             redo: mdiRedo,
             viewGridOutline: mdiViewGridOutline,

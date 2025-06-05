@@ -1,6 +1,6 @@
 import axios from "axios";
 import { route } from "ziggy-js";
-import type { Block } from "@/types/websiteBuilder";
+import type { Block, Theme } from "@/types/websiteBuilder";
 
 interface SaveWebsiteResponse {
     message: string;
@@ -9,15 +9,17 @@ interface SaveWebsiteResponse {
 }
 
 /**
- * Saves the website blocks for a given website ID.
+ * Saves the website blocks and theme for a given website ID.
  * @param websiteId The ID of the website to save.
  * @param blocks The array of Block objects.
+ * @param theme The theme configuration.
  * @returns A promise that resolves with the save response containing updated blocks.
  */
 export async function saveWebsiteData(
     eventId: number,
     websiteId: number,
-    blocks: Block[]
+    blocks: Block[],
+    theme: Theme
 ): Promise<SaveWebsiteResponse> {
     try {
         if (!eventId) {
@@ -62,6 +64,12 @@ export async function saveWebsiteData(
                 });
             });
 
+            // Append theme data
+            formData.append('theme[primary]', theme.primary);
+            formData.append('theme[secondary]', theme.secondary);
+            formData.append('theme[accent]', theme.accent);
+            formData.append('theme[background]', theme.background);
+
             const response = await axios.post<SaveWebsiteResponse>(
                 route("website.builder.save", {
                     event: eventId,
@@ -97,6 +105,7 @@ export async function saveWebsiteData(
                 }),
                 {
                     blocks: cleanedBlocks,
+                    theme: theme,
                 }
             );
             return response.data;

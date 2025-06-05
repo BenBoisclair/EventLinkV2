@@ -65,7 +65,7 @@ export const blockDefaults: BlockDefaultsMap = {
             backgroundColor: "#000000",
             textColor: "#FFFFFF",
         },
-        title: "Stats Block",
+        title: "Stats",
         description:
             "Displays important metrics and key numbers with a customizable background.",
         icon: "ChartBarIcon",
@@ -86,7 +86,7 @@ export const blockDefaults: BlockDefaultsMap = {
             overlayColor: "#000000",
             descriptionIcon: null,
         },
-        title: "Hero Block",
+        title: "Hero",
         description: "A prominent full-width image or color block.",
         icon: "PhotoIcon",
     },
@@ -109,7 +109,7 @@ export const blockDefaults: BlockDefaultsMap = {
                 "Provide details about your event or topic here. You can elaborate on the purpose, schedule, speakers, or any relevant information.",
             device: "desktop" as DeviceType,
         },
-        title: "Description Block",
+        title: "Description",
         description:
             "A block for displaying a title and detailed description text.",
         icon: "DocumentTextIcon",
@@ -138,14 +138,14 @@ export const blockDefaults: BlockDefaultsMap = {
         description: "Displays a list of event exhibitors.",
         icon: "BuildingStorefrontIcon",
     },
-    // Canvas: {
-    //     component: "CanvasBlock",
-    //     props: {
-    //         canvasData: null,
-    //         device: "desktop" as DeviceType,
-    //     },
-    //     title: "Canvas Block",
-    //     description: "An interactive canvas for drawing.",
-    //     icon: "PaintBrushIcon",
-    // },
+    Canvas: {
+        component: "CanvasBlock",
+        props: {
+            canvasData: null,
+            device: "desktop" as DeviceType,
+        },
+        title: "Canvas",
+        description: "An interactive canvas for drawing.",
+        icon: "PaintBrushIcon",
+    },
 };

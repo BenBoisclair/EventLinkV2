@@ -29,6 +29,9 @@ importers:
       pinia:
         specifier: ^3.0.2
         version: 3.0.2(typescript@5.8.3)(vue@3.5.14(typescript@5.8.3))
+      vuedraggable:
+        specifier: ^4.1.0
+        version: 4.1.0(vue@3.5.14(typescript@5.8.3))
       vuetify:
         specifier: ^3.8.6
         version: 3.8.6(typescript@5.8.3)(vue@3.5.14(typescript@5.8.3))
@@ -1367,6 +1370,9 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
+  sortablejs@1.14.0:
+    resolution: {integrity: sha512-pBXvQCs5/33fdN1/39pPL0NZF20LeRbLQ5jtnheIPN9JQAaufGjKdWduZn4U7wCtVuzKhmRkI0DFYHYRbB2H1w==}
+
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
@@ -1542,6 +1548,11 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  vuedraggable@4.1.0:
+    resolution: {integrity: sha512-FU5HCWBmsf20GpP3eudURW3WdWTKIbEIQxh9/8GE806hydR9qZqRRxRE3RjqX7PkuLuMQG/A7n3cfj9rCEchww==}
+    peerDependencies:
+      vue: ^3.0.1
 
   vuetify-use-dialog@0.6.11:
     resolution: {integrity: sha512-iPAu6MsN8suuNAS1M6JN2CaOXRgr7LZ2u+UNtAw0Fi3AjianzVIrnRNhQcAZjmE8Hu6ZwAbgte1p47qU6OazLw==}
@@ -2736,6 +2747,8 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
+  sortablejs@1.14.0: {}
+
   source-map-js@1.2.1: {}
 
   sourcemap-codec@1.4.8: {}
@@ -2919,6 +2932,11 @@ snapshots:
       '@vue/shared': 3.5.14
     optionalDependencies:
       typescript: 5.8.3
+
+  vuedraggable@4.1.0(vue@3.5.14(typescript@5.8.3)):
+    dependencies:
+      sortablejs: 1.14.0
+      vue: 3.5.14(typescript@5.8.3)
 
   vuetify-use-dialog@0.6.11(vue@3.5.14(typescript@5.8.3))(vuetify@3.8.6(typescript@5.8.3)(vue@3.5.14(typescript@5.8.3))):
     dependencies:

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { Block, DeviceType } from "@/types/websiteBuilder";
+import type { Block, DeviceType, Theme } from "@/types/websiteBuilder";
 import type { EventType } from "@/types/event";
 import {
     saveWebsiteData,
@@ -26,6 +26,12 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
     const lastUpdatedAt = ref<string | null>(null);
     const autoSaveInterval = ref<number | null>(null);
     const showSavedMessage = ref<boolean>(false);
+    const theme = ref<Theme>({
+        primary: "#3b82f6",
+        secondary: "#64748b", 
+        accent: "#f59e0b",
+        background: "#ffffff"
+    });
     const currentBlockType = computed(() => {
         if (!currentBlockId.value) return null;
         const block = blocks.value.find((b) => b.id === currentBlockId.value);
@@ -68,6 +74,7 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         isPublished?: boolean;
         event?: EventType;
         lastUpdatedAt?: string;
+        websiteSettings?: any;
     }) {
         websiteId.value = data.websiteId;
         websiteSlug.value = data.websiteSlug ?? null;
@@ -75,6 +82,12 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         isPublished.value = data.isPublished ?? false;
         currentEvent.value = data.event ?? null;
         lastUpdatedAt.value = data.lastUpdatedAt ?? null;
+        theme.value = data.websiteSettings?.theme ?? {
+            primary: "#3b82f6",
+            secondary: "#64748b", 
+            accent: "#f59e0b",
+            background: "#ffffff"
+        };
         isDirty.value = false;
         saveState.value = "idle";
         saveError.value = null;
@@ -125,6 +138,14 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
     }
 
     /**
+     * Updates theme properties.
+     */
+    function updateTheme(newTheme: Partial<Theme>) {
+        theme.value = { ...theme.value, ...newTheme };
+        isDirty.value = true;
+    }
+
+    /**
      * Saves the website (blocks) to the backend.
      */
     async function saveWebsite() {
@@ -139,7 +160,8 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
             const response = await saveWebsiteData(
                 currentEvent.value.id,
                 websiteId.value,
-                blocks.value
+                blocks.value,
+                theme.value
             );
 
             // Optionally update blocks from response
@@ -348,12 +370,14 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         currentBlockType,
         autoSaveInterval,
         showSavedMessage,
+        theme,
 
         // Actions
         initializeBuilder,
         addBlock,
         deleteBlock,
         updateBlock,
+        updateTheme,
         saveWebsite,
         publishWebsite: publishWebsiteAction,
         unpublishWebsite: unpublishWebsiteAction,

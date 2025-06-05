@@ -76,6 +76,12 @@ const handleKeyDown = (event: KeyboardEvent) => {
         if (canRedo.value) {
             handleRedo();
         }
+    } else if (isModifierPressed && event.key === "s") {
+        // Cmd/Ctrl+S for save
+        event.preventDefault();
+        if (!isSavingDebounced.value) {
+            handleSave();
+        }
     }
 };
 
@@ -269,7 +275,7 @@ onUnmounted(() => {
                             class="text-gray-600 dark:text-dark-text-secondary"
                         />
                     </template>
-                    <span>{{ lastUpdatedText || "Save changes" }}</span>
+                    <span>{{ lastUpdatedText || `Save changes (${isMac ? "⌘" : "Ctrl"}+S)` }}</span>
                 </v-tooltip>
             </div>
         </div>

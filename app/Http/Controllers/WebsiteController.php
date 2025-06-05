@@ -243,6 +243,11 @@ class WebsiteController extends Controller
             $this->processPendingFiles($blockData, $index, $request, $website, $block);
         }
 
+        // Handle theme data
+        if (isset($validated['theme']) && is_array($validated['theme'])) {
+            $this->updateWebsiteTheme($website, $validated['theme']);
+        }
+
         return $this->buildSaveResponse($website);
     }
 
@@ -314,6 +319,11 @@ class WebsiteController extends Controller
             'blocks.*.id' => 'required_with:blocks.*|string',
             'blocks.*.type' => 'required_with:blocks.*|string',
             'blocks.*.props' => 'nullable|array',
+            'theme' => 'nullable|array',
+            'theme.primary' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'theme.secondary' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'theme.accent' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'theme.background' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
         ]);
 
         // Dynamically validate any pending file fields
@@ -486,6 +496,31 @@ class WebsiteController extends Controller
         }
 
         return $props;
+    }
+
+    /**
+     * Update the website theme in settings.
+     */
+    private function updateWebsiteTheme(Website $website, array $themeData): void
+    {
+        $settings = $website->settings;
+        
+        // Update theme properties if provided
+        if (isset($themeData['primary'])) {
+            $settings->theme->primary = $themeData['primary'];
+        }
+        if (isset($themeData['secondary'])) {
+            $settings->theme->secondary = $themeData['secondary'];
+        }
+        if (isset($themeData['accent'])) {
+            $settings->theme->accent = $themeData['accent'];
+        }
+        if (isset($themeData['background'])) {
+            $settings->theme->background = $themeData['background'];
+        }
+        
+        $website->settings = $settings;
+        $website->save();
     }
 
     /**

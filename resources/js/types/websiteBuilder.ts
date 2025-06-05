@@ -22,6 +22,13 @@ export interface BlockSection {
 export type DeviceType = "desktop" | "tablet" | "mobile";
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
+
+export interface Theme {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+}
 export interface BlockOption {
     type: string;
     title: string;

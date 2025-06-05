@@ -2,25 +2,13 @@
 import Button from "@/Components/UI/Button.vue";
 
 defineProps({
-    editorTitle: {
+    title: {
         type: String,
-        required: true,
-    },
-    confirmText: {
-        type: String,
-        default: "Save",
-    },
-    backText: {
-        type: String,
-        default: "Cancel",
+        default: "Add New Block",
     },
 });
 
-const emit = defineEmits<{ (e: "confirm"): void; (e: "back"): void }>();
-
-const handleConfirm = () => {
-    emit("confirm");
-};
+const emit = defineEmits<{ (e: "back"): void }>();
 
 const handleBack = () => {
     emit("back");
@@ -32,9 +20,7 @@ const handleBack = () => {
         <h4
             class="mb-3 font-semibold text-gray-700 dark:text-dark-text-primary text-md"
         >
-            <slot name="title">
-                {{ editorTitle }}
-            </slot>
+            {{ title }}
         </h4>
 
         <div class="flex mb-4 overflow-y-auto grow">
@@ -45,18 +31,11 @@ const handleBack = () => {
             class="flex justify-end pt-3 space-x-2 border-t dark:border-dark-border"
         >
             <Button
-                :text="backText"
+                text="Cancel"
                 icon="$arrowLeft"
                 variant="outline-toned"
                 size="sm"
                 @click="handleBack"
-            />
-            <Button
-                :text="confirmText"
-                icon="$contentSave"
-                variant="primary"
-                size="sm"
-                @click="handleConfirm"
             />
         </div>
     </div>

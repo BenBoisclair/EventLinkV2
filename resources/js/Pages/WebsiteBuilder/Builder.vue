@@ -47,6 +47,7 @@ onMounted(() => {
         isPublished: page.props.isPublished,
         event: page.props.event,
         lastUpdatedAt: page.props.lastUpdatedAt,
+        websiteSettings: page.props.websiteSettings,
     });
 
     if (page.props.event) {
@@ -82,6 +83,13 @@ useWebsiteBuilderEcho(
 );
 
 const hasBlocks = computed(() => blocks.value.length > 0);
+
+// Ref to BuilderSidebar
+const builderSidebarRef = ref<InstanceType<typeof BuilderSidebar> | null>(null);
+
+const handleRequestAddBlock = () => {
+    builderSidebarRef.value?.showAddBlockView();
+};
 </script>
 
 <template>
@@ -89,6 +97,7 @@ const hasBlocks = computed(() => blocks.value.length > 0);
         <BuilderBar />
         <div class="flex flex-1 overflow-hidden">
             <BuilderSidebar
+                ref="builderSidebarRef"
                 :style="{ width: `${sidebarWidth}px` }"
                 class="flex-shrink-0 h-full overflow-y-auto"
             />
@@ -109,6 +118,7 @@ const hasBlocks = computed(() => blocks.value.length > 0);
                     <WebsiteEditorRenderer
                         :event="page.props.event"
                         class="rounded-md shadow-lg"
+                        @request-add-block="handleRequestAddBlock"
                     />
                 </div>
             </div>

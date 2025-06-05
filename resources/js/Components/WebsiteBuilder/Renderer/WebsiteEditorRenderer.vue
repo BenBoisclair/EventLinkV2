@@ -65,6 +65,10 @@ const rendererStyle = computed((): StyleValue => {
             : "sans-serif",
     };
 });
+
+const emit = defineEmits<{
+    requestAddBlock: [];
+}>();
 </script>
 
 <template>
@@ -74,10 +78,14 @@ const rendererStyle = computed((): StyleValue => {
                 v-if="!blocks || blocks.length === 0"
                 class="flex min-h-[500px] flex-1 items-center justify-center p-6"
             >
-                <div class="text-center text-gray-500">
-                    <p class="mb-4 text-sm font-medium text-primary">
-                        Nothing here yet. Add content using the editor.
-                    </p>
+                <div class="text-center">
+                    <Button
+                        @click="emit('requestAddBlock')"
+                        variant="primary"
+                        icon="$plus"
+                        text="Add Block"
+                        size="lg"
+                    />
                 </div>
             </div>
             <div v-else class="w-full">
