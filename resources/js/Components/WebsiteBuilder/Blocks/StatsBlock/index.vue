@@ -4,21 +4,23 @@ import type { StatsBlockProps } from "@/types/blocks";
 import { computed, withDefaults } from "vue";
 import { useThemeColors } from "@/Composables/useThemeColors";
 
-const props = withDefaults(
-    defineProps<StatsBlockProps>(),
-    {}
-);
+const props = withDefaults(defineProps<StatsBlockProps & {
+    theme?: {
+        primary: string;
+        secondary: string;
+        accent: string;
+        background: string;
+    };
+}>(), {});
 
-const { colors } = useThemeColors();
-
-
+const { colors } = useThemeColors(props.theme);
 </script>
 
 <template>
     <BlockContainer
-        :background-color="colors.backgroundAccent"
+        :background-color="colors.backgroundPrimary"
         class="py-12 md:py-16"
-        :style="{ color: colors.accentText }"
+        :style="{ color: colors.textPrimary }"
     >
         <div class="container px-4 mx-auto">
             <div

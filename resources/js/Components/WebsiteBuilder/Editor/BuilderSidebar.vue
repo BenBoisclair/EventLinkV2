@@ -8,6 +8,7 @@ import { computed, defineAsyncComponent, ref, shallowRef, watch } from "vue";
 import AddBlockSelector from "./AddBlockSelector.vue";
 import BlocksSection from "./BlocksSection.vue";
 import ThemeSection from "./ThemeSection.vue";
+import StyleSection from "./StyleSection.vue";
 
 const websiteBuilderStore = useWebsiteBuilderStore();
 
@@ -134,6 +135,7 @@ defineExpose({
         >
             <BlocksSection @request-add-block="showAddBlockView" />
             <ThemeSection />
+            <!-- <StyleSection /> -->
         </div>
 
         <Transition name="slide-editor" mode="out-in">

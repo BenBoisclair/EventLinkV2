@@ -59,6 +59,7 @@ Route::middleware([
 
     Route::post('/organiser/events', [\App\Http\Controllers\EventController::class, 'store'])->name('organiser.events.store');
     Route::patch('/organiser/events/{event}', [\App\Http\Controllers\EventController::class, 'update'])->name('organiser.event.update');
+    Route::delete('/organiser/events/{event}', [\App\Http\Controllers\EventController::class, 'destroy'])->name('organiser.event.destroy');
 
     Route::post('/events/{event}/website/{website}/save', [\App\Http\Controllers\WebsiteController::class, 'save'])
         ->name('website.builder.save');

@@ -16,17 +16,29 @@ interface Props {
         end_date?: string;
         location?: string;
     };
+    theme?: {
+        primary: string;
+        secondary: string;
+        accent: string;
+        background: string;
+    };
 }
 
 const props = withDefaults(defineProps<Props>(), {
     blocks: () => [],
     selectedFont: "Inter",
     event: undefined,
+    theme: () => ({
+        primary: '#3b82f6',
+        secondary: '#64748b',
+        accent: '#f59e0b',
+        background: '#ffffff'
+    })
 });
 
 
 const prepareBlockProps = (block: Block) => {
-    return buildBlockProps(
+    const baseProps = buildBlockProps(
         block,
         null, // No editing in display mode
         null, // No editing props
@@ -35,6 +47,12 @@ const prepareBlockProps = (block: Block) => {
         props.event,
         extractWebsiteId(usePage().props)
     );
+    
+    // Add theme to block props
+    return {
+        ...baseProps,
+        theme: props.theme
+    };
 };
 
 const rendererStyle = computed((): StyleValue => {

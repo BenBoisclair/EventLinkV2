@@ -3,7 +3,6 @@ import BlockButton from "@/Components/UI/BlockButton.vue";
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
 import type { CountdownBlockProps } from "@/types/blocks";
 import type { Event } from "@/types/event";
-import { getContrastingTextColor } from "@/utils/color";
 import {
     computed,
     onMounted,
@@ -28,6 +27,12 @@ const props = withDefaults(
             buttonText?: string;
             buttonLink?: string;
             buttonEnabled?: boolean;
+            theme?: {
+                primary: string;
+                secondary: string;
+                accent: string;
+                background: string;
+            };
         }
     >(),
     {
@@ -47,30 +52,11 @@ const props = withDefaults(
     }
 );
 
-const { colors } = useThemeColors();
-
-
-
-// Theme-based styling
-const computedBackgroundColor = computed(() => {
-    return colors.value.backgroundPrimary;
-});
-
-const computedTextColor = computed(() => {
-    return colors.value.textPrimary;
-});
+const { colors } = useThemeColors(props.theme);
 
 const unitBackgroundStyle = computed(() => ({
     backgroundColor: colors.value.backgroundSecondary,
 }));
-
-const computedButtonBackgroundColor = computed(() => {
-    return colors.value.buttonPrimary;
-});
-
-const computedButtonTextColor = computed(() => {
-    return colors.value.buttonPrimaryText;
-});
 
 const timeLeft = ref({
     days: 0,
@@ -154,12 +140,12 @@ watch(
     >
         <div
             class="container w-full px-4 mx-auto"
-            :style="{ color: computedTextColor }"
+            :style="{ color: colors.textPrimary }"
         >
             <BlockTitle
                 v-if="!isCountdownFinished"
                 :title="props.title"
-                :title-color="computedTextColor"
+                :title-color="colors.textPrimary"
                 tag="h2"
                 text-align="center"
                 default-classes="mb-6 text-2xl font-bold md:mb-8 md:text-3xl"
@@ -229,8 +215,8 @@ watch(
                 <BlockButton
                     :text="props.buttonText"
                     :href="props.buttonLink"
-                    :color="computedButtonBackgroundColor"
-                    :textColor="computedButtonTextColor"
+                    :color="colors.buttonPrimary"
+                    :textColor="colors.buttonPrimaryText"
                     variant="primary"
                     class="px-5 py-2.5 text-base font-bold md:px-6 md:py-3"
                 />

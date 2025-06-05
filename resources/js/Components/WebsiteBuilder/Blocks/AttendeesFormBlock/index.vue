@@ -9,15 +9,24 @@ import { computed, onMounted, ref, withDefaults, watch, reactive } from "vue";
 import BlockTitle from "../BlockTitle.vue";
 import { useThemeColors } from "@/Composables/useThemeColors";
 
+interface Props extends AttendeesFormBlockProps {
+    theme?: {
+        primary: string;
+        secondary: string;
+        accent: string;
+        background: string;
+    };
+}
+
 const props = withDefaults(
-    defineProps<AttendeesFormBlockProps>(),
+    defineProps<Props>(),
     {
         title: "Register for the Event",
         buttonText: "Submit",
     }
 );
 
-const { colors } = useThemeColors();
+const { colors } = useThemeColors(props.theme);
 
 
 const page = usePage();
@@ -73,9 +82,6 @@ const handleSubmit = () => {
 
     form = useForm(submitData);
 
-    console.log("Form data being submitted:", form.data());
-    console.log("Enabled fields:", enabledFields.value);
-
     form.post(`/events/${props.event.id}/attendees/register`, {
         preserveScroll: true,
         onSuccess: () => {
@@ -96,7 +102,6 @@ const handleSubmit = () => {
         },
         onError: (errors) => {
             // Errors are automatically handled by Inertia and available in form.errors
-            console.error("Form submission errors:", errors);
         },
     });
 };

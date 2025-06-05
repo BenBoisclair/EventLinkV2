@@ -3,7 +3,8 @@ import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.
 import type { CanvasBlockProps } from "@/types/blocks";
 import axios from "axios";
 import { debounce } from "lodash";
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, ref, watch, computed } from "vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 declare global {
     interface Window {
@@ -14,8 +15,16 @@ declare global {
 const props = defineProps<
     CanvasBlockProps & {
         websiteId: string | number;
+        theme?: {
+            primary: string;
+            secondary: string;
+            accent: string;
+            background: string;
+        };
     }
 >();
+
+const { colors } = useThemeColors(props.theme);
 
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
@@ -25,14 +34,14 @@ const lastY = ref(0);
 const isSaving = ref(false);
 const saveError = ref<string | null>(null);
 
-// --- New State for Color and Stroke Size ---
-const availableColors = ref([
+// Dynamic theme-based color palette
+const availableColors = computed(() => [
+    colors.value.themePrimary,
+    colors.value.themeSecondary, 
+    colors.value.themeAccent,
     "#FFB6C1", // Light Pink
     "#ADD8E6", // Baby Blue
-    "#98FB98", // Pale Green
-    "#E6E6FA", // Lavender
-    "#FFFACD",
-]); // Black, Red, Blue, Green, Yellow
+]);
 const selectedColor = ref(availableColors.value[0]);
 
 const availableStrokeSizes = ref([1, 3, 5]); // Small, Medium, Large
@@ -115,14 +124,8 @@ const getCoordinates = (
 };
 
 const debouncedSaveCanvasStateToBackend = debounce(async () => {
-
     const canvas = canvasRef.value;
-    console.log("Checking save conditions:", {
-        canvasExists: !!canvas,
-        blockId: props.id,
-    });
     if (!canvas || !props.id) {
-        console.error("Cannot save canvas: Missing canvas or block ID.");
         return;
     }
 
@@ -131,23 +134,17 @@ const debouncedSaveCanvasStateToBackend = debounce(async () => {
     saveError.value = null;
 
     try {
-        console.log(`Saving canvas data for block ${props.id}...`);
         const response = await axios.patch(
             `/websites/${props.websiteId}/blocks/${props.id}/canvas`,
             { canvasData: dataUrl }
         );
 
-        if (response.data.success) {
-            console.log(
-                `Canvas data saved successfully for block ${props.id}.`
-            );
-        } else {
+        if (!response.data.success) {
             throw new Error(
                 response.data.error || "Failed to save canvas data."
             );
         }
     } catch (error: any) {
-        console.error("Error saving canvas data:", error);
         saveError.value =
             error.response?.data?.error ||
             error.message ||
@@ -166,10 +163,8 @@ const loadCanvasFromDataUrl = (dataUrl: string) => {
     img.onload = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
-        console.log(`Canvas loaded from data URL for block ${props.id}`);
     };
-    img.onerror = (err) => {
-        console.error("Error loading canvas image:", err);
+    img.onerror = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
     img.src = dataUrl;
@@ -224,9 +219,6 @@ watch(
     () => props.canvasData,
     (newData, oldData) => {
         if (newData !== oldData && !isDrawing.value) {
-            console.log(
-                `Canvas data prop changed for block ${props.id}, reloading.`
-            );
             loadCanvasState();
         }
     }
@@ -240,32 +232,20 @@ const listenForCanvasUpdates = () => {
         typeof window === "undefined" ||
         !window.Echo
     ) {
-        console.warn(
-            "Echo not available, not listening for canvas updates."
-        );
         return;
     }
 
-    console.log(`Listening on channel: private-canvas-block.${props.id}`);
     window.Echo.private(`canvas-block.${props.id}`)
         .listen(
             ".canvas.updated",
             (event: { blockId: string; updated_at: number }) => {
-                console.log("Received canvas update notification:", event);
                 if (event.blockId === props.id && !isDrawing.value) {
-                    // Instead of loading directly, fetch the latest data
-                    console.log(
-                        `Fetching latest canvas data for block ${props.id}...`
-                    );
                     fetchLatestCanvasData();
                 }
             }
         )
-        .error((error: any) => {
-            console.error(
-                `Global Echo channel error for block ${props.id}:`,
-                error
-            );
+        .error(() => {
+            // Handle Echo channel errors silently
         });
 };
 
@@ -281,28 +261,14 @@ const fetchLatestCanvasData = async () => {
             const canvas = canvasRef.value;
             const ctx = getContext();
             ctx?.clearRect(0, 0, canvas?.width ?? 0, canvas?.height ?? 0);
-            console.log(
-                `Canvas cleared for block ${props.id} based on fetched data.`
-            );
-        } else {
-            console.error(
-                `Failed to fetch canvas data for block ${props.id}:`,
-                response.data.error || "Unknown error"
-            );
         }
     } catch (error: any) {
-        console.error(
-            `Error during fetchLatestCanvasData for block ${props.id}:`,
-            error
-        );
+        // Handle fetch errors silently
     }
 };
 
 const stopListeningForCanvasUpdates = () => {
     if (props.id && typeof window !== "undefined" && window.Echo) {
-        console.log(
-            `Stopping listening on channel: private-canvas-block.${props.id}`
-        );
         window.Echo.leaveChannel(`private-canvas-block.${props.id}`);
     }
 };
@@ -316,39 +282,48 @@ const stopListeningForCanvasUpdates = () => {
             ref="canvasRef"
             width="1500"
             height="1000"
-            class="bg-white border border-gray-300 dark:border-dark-border dark:bg-dark-surface cursor-crosshair"
-            style="touch-action: none"
+            class="border cursor-crosshair"
+            :style="{
+                touchAction: 'none',
+                backgroundColor: colors.backgroundPrimary,
+                borderColor: colors.borderColor
+            }"
         ></canvas>
 
         <!-- Color & Size Controls -->
         <div class="absolute flex flex-col gap-2 left-2 top-2">
             <!-- Color Palette -->
-            <div class="flex gap-1 p-1 rounded shadow">
+            <div 
+                class="flex gap-1 p-1 rounded shadow"
+                :style="{ backgroundColor: colors.backgroundSecondary }"
+            >
                 <button
                     v-for="color in availableColors"
                     :key="color"
                     @click="selectedColor = color"
                     :style="{ backgroundColor: color }"
                     class="w-6 h-6 border-2 rounded-full"
-                    :class="{
-                        'border-blue-500 ring-2 ring-blue-300':
-                            selectedColor === color,
-                        'border-gray-300': selectedColor !== color,
+                    :style="{
+                        borderColor: selectedColor === color ? colors.themePrimary : colors.borderColor,
+                        boxShadow: selectedColor === color ? `0 0 0 2px ${colors.themePrimary}33` : 'none'
                     }"
+                    class="border-2 rounded-full transition-all"
                 ></button>
             </div>
             <!-- Stroke Size Selector -->
-            <div class="flex items-center gap-1 p-1 rounded shadow w-fit">
+            <div 
+                class="flex items-center gap-1 p-1 rounded shadow w-fit"
+                :style="{ backgroundColor: colors.backgroundSecondary }"
+            >
                 <button
                     v-for="size in availableStrokeSizes"
                     :key="size"
                     @click="selectedStrokeSize = size"
-                    class="flex items-center justify-center w-6 h-6 text-xs border-2 rounded"
-                    :class="{
-                        'border-blue-500 bg-blue-100 ring-2 ring-blue-300':
-                            selectedStrokeSize === size,
-                        'border-gray-300 bg-gray-50 hover:bg-gray-100':
-                            selectedStrokeSize !== size,
+                    class="flex items-center justify-center w-6 h-6 text-xs border-2 rounded transition-colors"
+                    :style="{
+                        borderColor: selectedStrokeSize === size ? colors.themePrimary : colors.borderColor,
+                        backgroundColor: selectedStrokeSize === size ? colors.backgroundSecondary : colors.backgroundPrimary,
+                        color: colors.textPrimary
                     }"
                 >
                     {{ size }}px

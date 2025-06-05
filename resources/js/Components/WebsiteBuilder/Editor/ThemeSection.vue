@@ -38,8 +38,8 @@ const handleThemeColorChange = (
                 {{ isOpen ? "$chevronUp" : "$chevronDown" }}
             </v-icon>
         </button>
-        <div class="px-6 py-4 pb-6">
-            <div v-if="isOpen">
+        <div class="px-6">
+            <div v-if="isOpen" class="pt-4 pb-6">
                 <span class="text-lg font-medium">Custom</span>
                 <div class="flex items-start gap-1 mt-2">
                     <ColorPalettePicker

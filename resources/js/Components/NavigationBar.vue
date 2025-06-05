@@ -112,7 +112,7 @@
                             >
                             </v-list-item> -->
 
-                            <v-menu location="start" open-on-hover :offset="0">
+                            <!-- <v-menu location="start" open-on-hover :offset="0">
                                 <template v-slot:activator="{ props }">
                                     <v-list-item
                                         v-bind="props"
@@ -173,7 +173,7 @@
                                     >
                                     </v-list-item>
                                 </v-list>
-                            </v-menu>
+                            </v-menu> -->
 
                             <v-divider
                                 class="dark:border-dark-border"

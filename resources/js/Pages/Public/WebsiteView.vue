@@ -17,6 +17,12 @@ interface WebsiteData {
             title?: string;
             description?: string;
         };
+        theme?: {
+            primary: string;
+            secondary: string;
+            accent: string;
+            background: string;
+        };
     };
     blocks: Block[];
     event?: Event;
@@ -28,6 +34,15 @@ const { website } = defineProps<{ website: WebsiteData }>();
 
 const selectedFont = computed(() => {
     return website.settings?.design?.selectedFont || 'Inter'; // Default to Inter
+});
+
+const theme = computed(() => {
+    return website.settings?.theme || {
+        primary: '#3b82f6',
+        secondary: '#64748b',
+        accent: '#f59e0b',
+        background: '#ffffff'
+    };
 });
 
 const blocks = computed((): Block[] => {
@@ -151,6 +166,7 @@ onMounted(() => {
         :blocks="blocks"
         :event="eventForRenderer"
         :selected-font="selectedFont"
+        :theme="theme"
         class="min-h-screen"
     />
 </template>

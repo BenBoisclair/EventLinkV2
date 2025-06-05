@@ -30,7 +30,7 @@
                 <h2
                     class="font-bold dark:text-dark-primary text-heading-secondary text-primary"
                 >
-                    Exhibitors
+                    Exhibitor List
                 </h2>
                 <Button
                     icon="$refresh"
@@ -42,7 +42,7 @@
 
             <Input
                 v-model="searchQuery"
-                placeholder="Search Exhibitor by name, email, company..."
+                placeholder="Search Exhibitors"
                 icon="$magnify"
                 iconType="mdi"
                 class="mt-small max-w-input"

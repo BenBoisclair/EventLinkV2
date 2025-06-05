@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
 import type { HeroBlockProps } from "@/types/blocks";
-import { hexToRgba } from "@/utils/color";
 import { computed, withDefaults } from "vue";
 import { useThemeColors } from "@/Composables/useThemeColors";
 
@@ -9,15 +8,28 @@ const props = withDefaults(
     defineProps<
         HeroBlockProps & {
             websiteId: string | number;
+            theme?: {
+                primary: string;
+                secondary: string;
+                accent: string;
+                background: string;
+            };
         }
     >(),
     {
         textPosition: "middle",
         overlayEnabled: false,
+        theme: () => ({
+            primary: '#3b82f6',
+            secondary: '#64748b',
+            accent: '#f59e0b',
+            background: '#ffffff'
+        })
     }
 );
 
-const { colors, utils } = useThemeColors();
+// Use theme colors composable - will use props if provided, otherwise falls back to store
+const { colors, utils } = useThemeColors(props.theme);
 
 
 
@@ -60,17 +72,15 @@ const overlayStyle = computed(() => {
     return { backgroundColor: color };
 });
 
-const headingStyle = computed(() => {
-    // Use theme-based text color that contrasts with background
-    return { 
-        color: showImage.value ? "#FFFFFF" : colors.value.textPrimary 
-    };
-});
-
-const descriptionStyle = computed(() => {
-    // Use theme-based secondary text color that contrasts with background
-    return { 
-        color: showImage.value ? "#FFFFFF" : colors.value.textSecondary 
+const textStyles = computed(() => {
+    const hasImage = showImage.value;
+    return {
+        heading: { 
+            color: hasImage ? "#FFFFFF" : colors.value.textPrimary 
+        },
+        description: { 
+            color: hasImage ? "#FFFFFF" : colors.value.textSecondary 
+        }
     };
 });
 </script>
@@ -114,7 +124,7 @@ const descriptionStyle = computed(() => {
                     <h1
                         v-if="props.headingText"
                         class="text-3xl font-bold leading-tight sm:text-4xl md:text-5xl"
-                        :style="headingStyle"
+                        :style="textStyles.heading"
                     >
                         {{ props.headingText }}
                     </h1>
@@ -134,11 +144,11 @@ const descriptionStyle = computed(() => {
                             :icon="props.descriptionIcon"
                             class="mr-2"
                             size="small"
-                            :color="descriptionStyle.color"
+                            :color="textStyles.description.color"
                         />
                         <p
                             class="text-base sm:text-lg md:text-xl"
-                            :style="descriptionStyle"
+                            :style="textStyles.description"
                         >
                             {{ props.descriptionText }}
                         </p>

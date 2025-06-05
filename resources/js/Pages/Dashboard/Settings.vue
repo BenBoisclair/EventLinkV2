@@ -88,7 +88,6 @@
                     <InputError class="mt-2" :message="form.errors.location" />
                 </div>
 
-
                 <div class="flex items-center gap-4">
                     <Button
                         text="Save Changes"
@@ -120,8 +119,8 @@
             </form>
         </Section>
 
-        <!-- Delete Website Section -->
-        <Section v-if="hasWebsite" title="Website Settings">
+        <!-- Delete Event Section -->
+        <Section title="Danger Zone">
             <div
                 class="p-4 mt-4 border border-red-100 rounded-md dark:border-dark-status-red/30"
             >
@@ -138,14 +137,34 @@
                     text="Delete Website"
                     variant="danger"
                     class="w-full mt-3"
-                    @click="showDeleteModal = true"
+                    @click="showDeleteWebsiteModal = true"
+                />
+            </div>
+            <div
+                class="p-4 mt-4 border border-red-100 rounded-md dark:border-dark-status-red/30"
+            >
+                <p class="font-medium text-red-600 dark:text-dark-status-red">
+                    Delete Event
+                </p>
+                <p
+                    class="mt-1 text-sm dark:text-dark-text-secondary text-text-muted"
+                >
+                    Permanently delete this event and all associated data
+                    including attendees, exhibitors, and website content. This
+                    action cannot be undone.
+                </p>
+                <Button
+                    text="Delete Event"
+                    variant="danger"
+                    class="w-full mt-3"
+                    @click="showDeleteEventModal = true"
                 />
             </div>
         </Section>
 
         <!-- Delete Website Confirmation Modal -->
         <Modal
-            v-model="showDeleteModal"
+            v-model="showDeleteWebsiteModal"
             title="Delete Website?"
             :closeOnClickOutside="true"
         >
@@ -166,15 +185,54 @@
                     text="Cancel"
                     variant="primary"
                     class="flex-1"
-                    @click="showDeleteModal = false"
+                    @click="showDeleteWebsiteModal = false"
                 />
                 <Button
-                    :text="isDeleting ? 'Deleting...' : 'Yes, Delete'"
+                    :text="isDeletingWebsite ? 'Deleting...' : 'Yes, Delete'"
                     variant="outline-danger"
                     icon="$trashCanOutline"
                     class="flex-1"
-                    :disabled="isDeleting"
-                    @click="confirmDelete"
+                    :disabled="isDeletingWebsite"
+                    @click="confirmDeleteWebsite"
+                />
+            </div>
+        </Modal>
+
+        <!-- Delete Event Confirmation Modal -->
+        <Modal
+            v-model="showDeleteEventModal"
+            title="Delete Event?"
+            :closeOnClickOutside="true"
+        >
+            <p class="mt-4 text-sm">
+                Are you sure you want to delete this event? This action cannot
+                be undone.
+            </p>
+
+            <p
+                class="mt-2 text-sm dark:text-dark-text-secondary text-text-muted"
+            >
+                All event data including attendees, exhibitors, and website
+                content will be permanently removed. You will be redirected to
+                the events list.
+            </p>
+
+            <div class="flex gap-3 mt-6">
+                <Button
+                    text="Cancel"
+                    variant="primary"
+                    class="flex-1"
+                    @click="showDeleteEventModal = false"
+                />
+                <Button
+                    :text="
+                        isDeletingEvent ? 'Deleting...' : 'Yes, Delete Event'
+                    "
+                    variant="outline-danger"
+                    icon="$trashCanOutline"
+                    class="flex-1"
+                    :disabled="isDeletingEvent"
+                    @click="confirmDeleteEvent"
                 />
             </div>
         </Modal>
@@ -207,7 +265,7 @@ const formatDateForInput = (dateString) => {
     }
     // Otherwise, parse and format
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
 };
 
 const form = useForm({
@@ -245,19 +303,21 @@ const saveEventSettings = () => {
 };
 
 const hasWebsite = computed(() => event.value?.website !== null);
-const showDeleteModal = ref(false);
-const isDeleting = ref(false);
-let deleteStartTime = 0;
 
-const confirmDelete = () => {
+// Website deletion
+const showDeleteWebsiteModal = ref(false);
+const isDeletingWebsite = ref(false);
+let deleteWebsiteStartTime = 0;
+
+const confirmDeleteWebsite = () => {
     if (!event.value?.website?.id) {
         console.error("Website ID is missing, cannot delete.");
-        showDeleteModal.value = false;
+        showDeleteWebsiteModal.value = false;
         return;
     }
 
-    isDeleting.value = true;
-    deleteStartTime = Date.now();
+    isDeletingWebsite.value = true;
+    deleteWebsiteStartTime = Date.now();
 
     router.delete(
         route("organiser.event.website.destroy", {
@@ -267,25 +327,50 @@ const confirmDelete = () => {
         {
             preserveScroll: true,
             onFinish: () => {
-                const elapsedTime = Date.now() - deleteStartTime;
+                const elapsedTime = Date.now() - deleteWebsiteStartTime;
                 const delay = Math.max(0, 3000 - elapsedTime);
 
                 setTimeout(() => {
-                    isDeleting.value = false;
-                    showDeleteModal.value = false;
+                    isDeletingWebsite.value = false;
+                    showDeleteWebsiteModal.value = false;
                 }, delay);
             },
             onError: (errors) => {
                 console.error("Error deleting website:", errors);
-                const elapsedTime = Date.now() - deleteStartTime;
+                const elapsedTime = Date.now() - deleteWebsiteStartTime;
                 const delay = Math.max(0, 3000 - elapsedTime);
 
                 setTimeout(() => {
-                    isDeleting.value = false;
-                    showDeleteModal.value = false;
+                    isDeletingWebsite.value = false;
+                    showDeleteWebsiteModal.value = false;
                 }, delay);
             },
         }
     );
+};
+
+// Event deletion
+const showDeleteEventModal = ref(false);
+const isDeletingEvent = ref(false);
+
+const confirmDeleteEvent = () => {
+    if (!event.value?.id) {
+        console.error("Event ID is missing, cannot delete.");
+        showDeleteEventModal.value = false;
+        return;
+    }
+
+    isDeletingEvent.value = true;
+
+    router.delete(route("organiser.event.destroy", event.value.id), {
+        onFinish: () => {
+            // No need to reset state since we're redirecting
+        },
+        onError: (errors) => {
+            console.error("Error deleting event:", errors);
+            isDeletingEvent.value = false;
+            showDeleteEventModal.value = false;
+        },
+    });
 };
 </script>

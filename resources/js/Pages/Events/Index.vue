@@ -4,7 +4,7 @@ import Button from "@/Components/UI/Button.vue";
 import Container from "@/Components/UI/Container.vue";
 import DashboardLayout from "@/Layouts/DashboardLayout.vue";
 import { useEventStore } from "@/stores/eventStore";
-import type { EventType } from "@/types/event";
+import type { EventType, TeamEventData } from "@/types/event";
 import { router } from "@inertiajs/vue3";
 import { onMounted } from "vue";
 import { route } from "ziggy-js";
@@ -12,6 +12,7 @@ import { storeToRefs } from "pinia";
 
 const props = defineProps<{
     events: EventType[];
+    team_event_data: TeamEventData | null;
 }>();
 
 const eventStore = useEventStore();
@@ -41,16 +42,74 @@ onMounted(() => {
                                 class="text-2xl font-bold dark:text-dark-primary text-primary"
                             >
                                 Your Events
+                                <span
+                                    v-if="props.team_event_data"
+                                    class="ml-2 text-sm font-normal text-gray-500 dark:text-dark-text-secondary"
+                                >
+                                    ({{ props.team_event_data.event_count }}/{{
+                                        props.team_event_data
+                                            .has_unlimited_events
+                                            ? "∞"
+                                            : props.team_event_data.event_limit
+                                    }})
+                                </span>
                             </h1>
                             <p
                                 class="text-sm dark:text-dark-text-secondary text-text-muted"
                             >
                                 View and manage your created events.
+                                <span
+                                    v-if="props.team_event_data?.plan"
+                                    class="font-medium"
+                                >
+                                    {{ props.team_event_data.plan.name }} Plan
+                                </span>
+                                <br v-if="props.team_event_data?.plan" />
+                                <span
+                                    v-if="
+                                        props.team_event_data
+                                            ?.has_unlimited_events
+                                    "
+                                    class="text-green-600 dark:text-green-400"
+                                >
+                                    Unlimited events available.
+                                </span>
+                                <span
+                                    v-else-if="
+                                        props.team_event_data &&
+                                        props.team_event_data.remaining_slots >
+                                            0
+                                    "
+                                >
+                                    You have
+                                    {{ props.team_event_data.remaining_slots }}
+                                    event slot{{
+                                        props.team_event_data
+                                            .remaining_slots === 1
+                                            ? ""
+                                            : "s"
+                                    }}
+                                    remaining.
+                                </span>
+                                <span
+                                    v-else-if="
+                                        props.team_event_data &&
+                                        props.team_event_data
+                                            .remaining_slots === 0
+                                    "
+                                    class="text-orange-600 dark:text-orange-400"
+                                >
+                                    You have reached your event limit.
+                                </span>
                             </p>
                         </div>
                         <Button
                             @click="navigateToCreateEvent"
                             variant="primary"
+                            v-if="
+                                props.team_event_data?.can_create_event !==
+                                false
+                            "
                             text="Create Event"
                         >
                             <span class="flex items-center gap-2">
@@ -91,8 +150,22 @@ onMounted(() => {
                             </p>
                             <Button
                                 @click="navigateToCreateEvent"
-                                variant="outline-primary"
-                                text="Create Your First Event"
+                                :variant="
+                                    props.team_event_data?.can_create_event !==
+                                    false
+                                        ? 'outline-primary'
+                                        : 'outline'
+                                "
+                                :disabled="
+                                    props.team_event_data?.can_create_event ===
+                                    false
+                                "
+                                :text="
+                                    props.team_event_data?.can_create_event ===
+                                    false
+                                        ? 'Event Limit Reached'
+                                        : 'Create Your First Event'
+                                "
                             />
                         </div>
                     </div>

@@ -16,6 +16,12 @@ interface Props extends ExhibitorShowcaseBlockProps {
         id: number;
         name?: string;
     };
+    theme?: {
+        primary: string;
+        secondary: string;
+        accent: string;
+        background: string;
+    };
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -23,7 +29,7 @@ const props = withDefaults(defineProps<Props>(), {
     event: undefined,
 });
 
-const { colors } = useThemeColors();
+const { colors } = useThemeColors(props.theme);
 
 
 
@@ -39,34 +45,18 @@ const fetchExhibitors = async (eventId: number) => {
     error.value = null;
     exhibitors.value = [];
     const apiUrl = route("api.exhibitors.listForEvent", { event: eventId });
-    console.log(`[ExhibitorShowcase] Fetching exhibitors from: ${apiUrl}`);
     try {
         const response = await axios.get<{ data: Exhibitor[] }>(apiUrl);
-        console.log("[ExhibitorShowcase] API Response Received:", response);
         exhibitors.value = response.data?.data ?? [];
-        console.log(
-            `[ExhibitorShowcase] Parsed ${exhibitors.value.length} exhibitors.`
-        );
     } catch (err) {
-        console.error(
-            "[ExhibitorShowcase] Error fetching exhibitors (Full Error):",
-            err
-        );
         if (axios.isAxiosError(err)) {
-            console.error("[ExhibitorShowcase] Axios error details:", {
-                message: err.message,
-                response: err.response?.data,
-                status: err.response?.status,
-            });
             if (err.response?.status === 404) {
                 error.value = "Exhibitor data not found for this event.";
             } else {
-                error.value =
-                    "Failed to load exhibitors. Please check the console for details.";
+                error.value = "Failed to load exhibitors.";
             }
         } else {
-            error.value =
-                "An unexpected error occurred while fetching exhibitors.";
+            error.value = "An unexpected error occurred while fetching exhibitors.";
         }
     } finally {
         loading.value = false;

@@ -29,6 +29,16 @@ export interface Theme {
     accent: string;
     background: string;
 }
+
+export interface Styling {
+    borderRadius: "none" | "small" | "medium" | "large" | "full";
+    buttonSize: "xs" | "sm" | "md" | "lg" | "xl";
+    shadow: "none" | "xs" | "sm" | "md" | "lg" | "xl";
+    buttonStyle: "solid" | "outline" | "ghost";
+    animationSpeed: "none" | "slow" | "normal" | "fast";
+    fontWeight: "light" | "normal" | "medium" | "semibold" | "bold";
+    letterSpacing: "tight" | "normal" | "wide";
+}
 export interface BlockOption {
     type: string;
     title: string;

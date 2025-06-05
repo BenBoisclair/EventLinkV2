@@ -1,6 +1,6 @@
 import axios from "axios";
 import { route } from "ziggy-js";
-import type { Block, Theme } from "@/types/websiteBuilder";
+import type { Block, Theme, Styling } from "@/types/websiteBuilder";
 
 interface SaveWebsiteResponse {
     message: string;
@@ -19,7 +19,8 @@ export async function saveWebsiteData(
     eventId: number,
     websiteId: number,
     blocks: Block[],
-    theme: Theme
+    theme: Theme,
+    styling?: Styling
 ): Promise<SaveWebsiteResponse> {
     try {
         if (!eventId) {
@@ -70,6 +71,17 @@ export async function saveWebsiteData(
             formData.append('theme[accent]', theme.accent);
             formData.append('theme[background]', theme.background);
 
+            // Append styling data if provided
+            if (styling) {
+                formData.append('styling[borderRadius]', styling.borderRadius);
+                formData.append('styling[buttonSize]', styling.buttonSize);
+                formData.append('styling[shadow]', styling.shadow);
+                formData.append('styling[buttonStyle]', styling.buttonStyle);
+                formData.append('styling[animationSpeed]', styling.animationSpeed);
+                formData.append('styling[fontWeight]', styling.fontWeight);
+                formData.append('styling[letterSpacing]', styling.letterSpacing);
+            }
+
             const response = await axios.post<SaveWebsiteResponse>(
                 route("website.builder.save", {
                     event: eventId,
@@ -106,6 +118,7 @@ export async function saveWebsiteData(
                 {
                     blocks: cleanedBlocks,
                     theme: theme,
+                    ...(styling && { styling }),
                 }
             );
             return response.data;

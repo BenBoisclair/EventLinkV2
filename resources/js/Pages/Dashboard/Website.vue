@@ -5,12 +5,6 @@
             <p class="text-[14px] text-text-muted">
                 Manage the website for your event
             </p>
-            <p
-                v-if="hasWebsite && lastEdited"
-                class="mt-1 text-[12px] text-text-dimmed"
-            >
-                Last edited {{ lastEdited }}
-            </p>
         </div>
 
         <template v-if="isLoading">

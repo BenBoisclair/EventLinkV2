@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { Block, DeviceType, Theme } from "@/types/websiteBuilder";
+import type { Block, DeviceType, Theme, Styling } from "@/types/websiteBuilder";
 import type { EventType } from "@/types/event";
 import {
     saveWebsiteData,
@@ -31,6 +31,15 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         secondary: "#64748b", 
         accent: "#f59e0b",
         background: "#ffffff"
+    });
+    const styling = ref<Styling>({
+        borderRadius: "medium",
+        buttonSize: "md",
+        shadow: "sm",
+        buttonStyle: "solid",
+        animationSpeed: "normal",
+        fontWeight: "medium",
+        letterSpacing: "normal"
     });
     const currentBlockType = computed(() => {
         if (!currentBlockId.value) return null;
@@ -87,6 +96,15 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
             secondary: "#64748b", 
             accent: "#f59e0b",
             background: "#ffffff"
+        };
+        styling.value = data.websiteSettings?.styling ?? {
+            borderRadius: "medium",
+            buttonSize: "md",
+            shadow: "sm",
+            buttonStyle: "solid",
+            animationSpeed: "normal",
+            fontWeight: "medium",
+            letterSpacing: "normal"
         };
         isDirty.value = false;
         saveState.value = "idle";
@@ -146,6 +164,14 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
     }
 
     /**
+     * Updates styling properties.
+     */
+    function updateStyling(newStyling: Partial<Styling>) {
+        styling.value = { ...styling.value, ...newStyling };
+        isDirty.value = true;
+    }
+
+    /**
      * Saves the website (blocks) to the backend.
      */
     async function saveWebsite() {
@@ -161,7 +187,8 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
                 currentEvent.value.id,
                 websiteId.value,
                 blocks.value,
-                theme.value
+                theme.value,
+                styling.value
             );
 
             // Optionally update blocks from response
@@ -371,6 +398,7 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         autoSaveInterval,
         showSavedMessage,
         theme,
+        styling,
 
         // Actions
         initializeBuilder,
@@ -378,6 +406,7 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         deleteBlock,
         updateBlock,
         updateTheme,
+        updateStyling,
         saveWebsite,
         publishWebsite: publishWebsiteAction,
         unpublishWebsite: unpublishWebsiteAction,
