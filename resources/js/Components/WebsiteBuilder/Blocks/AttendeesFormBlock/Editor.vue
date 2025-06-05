@@ -4,7 +4,6 @@ import InputLabel from "@/Components/Forms/InputLabel.vue";
 import Select from "@/Components/Forms/Select.vue";
 import Button from "@/Components/UI/Button.vue";
 import Checkbox from "@/Components/UI/Checkbox.vue";
-import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import IconButton from "@/Components/UI/IconButton.vue";
 import Section from "@/Components/UI/Section.vue";
 import type { AttendeesFormBlockProps } from "@/types/blocks";
@@ -91,19 +90,6 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
 
 <template>
     <div v-if="currentProps" class="flex flex-col h-full gap-5">
-        <!-- Colors Section -->
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
-            <ColorPalettePicker
-                :model-value="currentProps.backgroundColor"
-                @update:model-value="updateProperty('backgroundColor', $event)"
-                label="Background Color"
-            />
-            <ColorPalettePicker
-                :model-value="currentProps.labelColor"
-                @update:model-value="updateProperty('labelColor', $event)"
-                label="Label Text Color"
-            />
-        </Section>
 
         <!-- Form Title -->
         <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
@@ -115,11 +101,6 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
                 :model-value="currentProps.title"
                 @update:model-value="updateProperty('title', $event)"
                 class="w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
-            />
-            <ColorPalettePicker
-                :model-value="currentProps.titleColor"
-                @update:model-value="updateProperty('titleColor', $event)"
-                label="Title Color"
             />
         </Section>
 
@@ -348,16 +329,6 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
                 :model-value="currentProps.buttonText"
                 @update:model-value="updateProperty('buttonText', $event)"
                 class="w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
-            />
-            <ColorPalettePicker
-                :model-value="currentProps.buttonTextColor"
-                @update:model-value="updateProperty('buttonTextColor', $event)"
-                label="Button Text Color"
-            />
-            <ColorPalettePicker
-                :model-value="currentProps.buttonColor"
-                @update:model-value="updateProperty('buttonColor', $event)"
-                label="Button Background Color"
             />
         </Section>
     </div>

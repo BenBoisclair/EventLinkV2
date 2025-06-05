@@ -7,22 +7,21 @@ import type { AttendeesFormBlockProps } from "@/types/blocks";
 import { useForm, usePage } from "@inertiajs/vue3";
 import { computed, onMounted, ref, withDefaults, watch, reactive } from "vue";
 import BlockTitle from "../BlockTitle.vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 const props = withDefaults(
     defineProps<AttendeesFormBlockProps>(),
     {
         title: "Register for the Event",
         buttonText: "Submit",
-        backgroundColor: "transparent",
     }
 );
+
+const { colors } = useThemeColors();
 
 
 const page = usePage();
 
-const backgroundStyle = computed(() => ({
-    backgroundColor: props.backgroundColor || "transparent",
-}));
 
 const enabledFields = computed(() => {
     return Array.isArray(props.fields)
@@ -105,14 +104,14 @@ const handleSubmit = () => {
 
 <template>
     <BlockContainer
-        :background-color="props.backgroundColor || 'transparent'"
+        :background-color="colors.backgroundPrimary"
         class="py-12 md:py-16"
     >
         <div class="container px-8 mx-auto" id="register">
             <div class="max-w-lg mx-auto md:max-w-2xl">
                 <BlockTitle
                     :title="props.title"
-                    :title-color="props.titleColor"
+                    :title-color="colors.textPrimary"
                     tag="h2"
                     text-align="center"
                     default-classes="mb-6 text-xl font-bold md:mb-8 md:text-3xl"
@@ -139,7 +138,7 @@ const handleSubmit = () => {
                         <BlockInputLabel
                             :for="field.name"
                             class="text-sm md:text-base"
-                            :style="{ color: props.labelColor }"
+                            :style="{ color: colors.textSecondary }"
                         >
                             {{ field.label }}
                             <span v-if="field.required" class="text-red-500"
@@ -197,12 +196,12 @@ const handleSubmit = () => {
                         :color="
                             isSubmitted
                                 ? '#10b981'
-                                : props.buttonColor || '#000000'
+                                : colors.buttonPrimary
                         "
                         :style="{
                             color: isSubmitted
                                 ? '#FFFFFF'
-                                : props.buttonTextColor || '#FFFFFF',
+                                : colors.buttonPrimaryText,
                             boxShadow: isSubmitted
                                 ? '0 0 20px rgba(16, 185, 129, 0.5)'
                                 : 'none',

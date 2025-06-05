@@ -3,7 +3,6 @@ import Input from "@/Components/Forms/Input.vue";
 import InputLabel from "@/Components/Forms/InputLabel.vue";
 import Toggle from "@/Components/Forms/Toggle.vue";
 import Checkbox from "@/Components/UI/Checkbox.vue";
-import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import Section from "@/Components/UI/Section.vue";
 import type { CountdownBlockProps } from "@/types/blocks";
 import { useBlockEditor } from "@/Composables/useBlockEditor";
@@ -40,13 +39,6 @@ const { currentProps, updateProperty } = useBlockEditor<CountdownBlockProps>(
             />
         </Section>
 
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
-            <ColorPalettePicker
-                :model-value="currentProps.textColor"
-                @update:model-value="updateProperty('textColor', $event)"
-                label="Text Color"
-            />
-        </Section>
 
         <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
             <div class="flex items-center justify-between">
@@ -149,20 +141,6 @@ const { currentProps, updateProperty } = useBlockEditor<CountdownBlockProps>(
                     type="url"
                     placeholder="https://example.com"
                     class="block w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
-                />
-                <ColorPalettePicker
-                    :model-value="currentProps.buttonTextColor"
-                    @update:model-value="
-                        updateProperty('buttonTextColor', $event)
-                    "
-                    label="Button Text Color"
-                />
-                <ColorPalettePicker
-                    :model-value="currentProps.buttonBackgroundColor"
-                    @update:model-value="
-                        updateProperty('buttonBackgroundColor', $event)
-                    "
-                    label="Button Background Color"
                 />
             </template>
         </Section>

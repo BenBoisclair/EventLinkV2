@@ -1,30 +1,24 @@
 <script setup lang="ts">
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
 import type { StatsBlockProps } from "@/types/blocks";
-import { computed } from "vue";
+import { computed, withDefaults } from "vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 const props = withDefaults(
     defineProps<StatsBlockProps>(),
-    {
-        backgroundColor: undefined,
-        textColor: "#FFFFFF",
-    }
+    {}
 );
 
+const { colors } = useThemeColors();
 
-const blockStyle = computed(() => {
-    return {
-        backgroundColor: props.backgroundColor,
-        color: props.textColor || "#FFFFFF",
-    };
-});
+
 </script>
 
 <template>
     <BlockContainer
-        :background-color="props.backgroundColor"
+        :background-color="colors.backgroundAccent"
         class="py-12 md:py-16"
-        :style="{ color: props.textColor || '#FFFFFF' }"
+        :style="{ color: colors.accentText }"
     >
         <div class="container px-4 mx-auto">
             <div

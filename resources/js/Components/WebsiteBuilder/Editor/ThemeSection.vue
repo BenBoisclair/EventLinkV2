@@ -59,14 +59,14 @@ const handleThemeColorChange = (
                     />
 
                     <ColorPalettePicker
-                        :model-value="theme.primary"
+                        :model-value="theme.accent"
                         @update:model-value="
                             (color) => handleThemeColorChange('accent', color)
                         "
                         id="accent-color"
                     />
                     <ColorPalettePicker
-                        :model-value="theme.secondary"
+                        :model-value="theme.background"
                         @update:model-value="
                             (color) =>
                                 handleThemeColorChange('background', color)

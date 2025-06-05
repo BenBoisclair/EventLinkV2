@@ -3,11 +3,12 @@ import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.
 import type { ExhibitorShowcaseBlockProps } from "@/types/blocks";
 import type { Exhibitor } from "@/types/exhibitor";
 import axios from "axios";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, withDefaults } from "vue";
 import { route } from "ziggy-js";
 import ExhibitorBannerDisplay from "../../../Exhibitor/ExhibitorBannerDisplay.vue";
 import ExhibitorCard from "../../../Exhibitor/ExhibitorCard.vue";
 import BlockTitle from "../BlockTitle.vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 interface Props extends ExhibitorShowcaseBlockProps {
     id: string;
@@ -19,10 +20,10 @@ interface Props extends ExhibitorShowcaseBlockProps {
 
 const props = withDefaults(defineProps<Props>(), {
     title: "Meet Our Exhibitors",
-    titleColor: "#000000",
-    backgroundColor: "#FFFFFF",
     event: undefined,
 });
+
+const { colors } = useThemeColors();
 
 
 
@@ -99,12 +100,12 @@ watch(
 
 <template>
     <BlockContainer
-        :background-color="props.backgroundColor ?? ''"
+        :background-color="colors.backgroundPrimary"
     >
         <div class="px-4 py-16 sm:px-6 lg:px-8">
             <BlockTitle
                 :title="props.title ?? ''"
-                :title-color="props.titleColor ?? ''"
+                :title-color="colors.textPrimary"
                 default-classes="text-3xl font-bold"
                 text-align="center"
             />
@@ -140,7 +141,7 @@ watch(
                         v-for="exhibitor in exhibitors"
                         :key="exhibitor.id"
                         :exhibitor="exhibitor"
-                        :card-background-color="props.backgroundColor ?? ''"
+                        :card-background-color="colors.backgroundPrimary"
                         @click="openExhibitorModal(exhibitor)"
                     />
                 </div>
@@ -151,6 +152,6 @@ watch(
     <ExhibitorBannerDisplay
         v-model="isModalOpen"
         :exhibitor="selectedExhibitor"
-        :background-color="props.backgroundColor ?? ''"
+        :background-color="colors.backgroundPrimary"
     />
 </template>

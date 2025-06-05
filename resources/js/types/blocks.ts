@@ -3,7 +3,6 @@ import type { DeviceType } from "@/types/websiteBuilder";
 
 export interface BaseBlockProps {
     id?: string;
-    backgroundColor?: string | null;
     device?: DeviceType;
 }
 
@@ -22,26 +21,21 @@ export interface HeroBlockProps extends BaseBlockProps {
         | "bottom-left"
         | "bottom-center"
         | "bottom-right";
-    headingTextColor?: string | null;
-    descriptionTextColor?: string | null;
     icon?: string | null;
     descriptionIcon?: string | null;
     _pendingFile_imageUrl?: File | null;
     _originalImageUrl?: string | null;
     _imageUrl_uploadingToS3?: boolean;
     overlayEnabled?: boolean;
-    overlayColor?: string | null;
 }
 
 export interface DescriptionBlockProps extends BaseBlockProps {
     title?: string;
     description?: string;
-    secondaryColor?: string;
 }
 
 export interface CountdownBlockProps extends BaseBlockProps {
     title?: string;
-    textColor?: string;
     startDate?: string | null;
     endDate?: string | null;
     useEventDates?: boolean;
@@ -52,14 +46,11 @@ export interface CountdownBlockProps extends BaseBlockProps {
     finishedText?: string;
     buttonText?: string;
     buttonLink?: string;
-    buttonTextColor?: string;
-    buttonBackgroundColor?: string;
     buttonEnabled?: boolean;
 }
 
 export interface StatsBlockProps extends BaseBlockProps {
     stats?: Stat[];
-    textColor?: string;
 }
 
 export interface Stat {
@@ -69,18 +60,13 @@ export interface Stat {
 
 export interface AttendeesFormBlockProps extends BaseBlockProps {
     title?: string;
-    titleColor?: string;
-    labelColor?: string;
     fields?: FormField[];
     event?: { id: string; name: string };
     buttonText?: string;
-    buttonTextColor?: string;
-    buttonColor?: string;
 }
 
 export interface ExhibitorShowcaseBlockProps extends BaseBlockProps {
     title?: string;
-    titleColor?: string | null;
 }
 
 export interface CanvasBlockProps extends BaseBlockProps {

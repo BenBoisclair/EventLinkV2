@@ -48,7 +48,7 @@ const onDragEnd = () => {
             </v-icon>
         </button>
         <div class="px-6">
-            <div v-if="isOpen" class="py-6">
+            <div v-if="isOpen" class="pt-4 pb-6">
                 <!-- Empty state when no blocks -->
                 <div
                     v-if="!blocks || blocks.length === 0"

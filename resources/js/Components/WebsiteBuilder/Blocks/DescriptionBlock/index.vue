@@ -4,28 +4,24 @@ import type { DescriptionBlockProps } from "@/types/blocks";
 import { getContrastingTextColor } from "@/utils/color";
 import { computed, withDefaults } from "vue";
 import BlockTitle from "../BlockTitle.vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 const props = withDefaults(
     defineProps<DescriptionBlockProps>(),
-    {
-        backgroundColor: "#FFFFFF",
-    }
+    {}
 );
 
+const { colors } = useThemeColors();
 
-const backgroundStyle = computed(() => ({
-    backgroundColor: props.backgroundColor ?? "#FFFFFF",
-}));
 
 const textColor = computed(() => {
-    const bgColor = props.backgroundColor ?? "#FFFFFF";
-    return getContrastingTextColor(bgColor);
+    return colors.value.textPrimary;
 });
 </script>
 
 <template>
     <BlockContainer
-        :background-color="props.backgroundColor"
+        :background-color="colors.backgroundPrimary"
         class="px-6 py-12 sm:px-8 md:px-16 md:py-16"
     >
         <div class="max-w-3xl mx-auto">

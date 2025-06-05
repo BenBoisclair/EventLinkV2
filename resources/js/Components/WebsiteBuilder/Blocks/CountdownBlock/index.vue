@@ -13,6 +13,7 @@ import {
     withDefaults,
 } from "vue";
 import BlockTitle from "../BlockTitle.vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 const props = withDefaults(
     defineProps<
@@ -26,15 +27,11 @@ const props = withDefaults(
             finishedText?: string;
             buttonText?: string;
             buttonLink?: string;
-            buttonTextColor?: string;
-            buttonBackgroundColor?: string;
             buttonEnabled?: boolean;
         }
     >(),
     {
         title: "Countdown",
-        backgroundColor: undefined,
-        textColor: undefined,
         startDate: undefined,
         endDate: undefined,
         useEventDates: false,
@@ -46,43 +43,33 @@ const props = withDefaults(
         finishedText: "Event has started! 🎉",
         buttonText: "",
         buttonLink: "",
-        buttonTextColor: "#FFFFFF",
-        buttonBackgroundColor: undefined,
         buttonEnabled: false,
     }
 );
 
+const { colors } = useThemeColors();
 
 
-// Color logic: use prop, else fallback to sensible default
+
+// Theme-based styling
 const computedBackgroundColor = computed(() => {
-    return props.backgroundColor || "#F5F5F5"; // fallback to light gray
+    return colors.value.backgroundPrimary;
 });
 
 const computedTextColor = computed(() => {
-    if (props.textColor) return props.textColor;
-    // Calculate contrast against effective background
-    const bgColor = computedBackgroundColor.value;
-    return getContrastingTextColor(bgColor);
+    return colors.value.textPrimary;
 });
 
-const blockStyle = computed(() => ({
-    backgroundColor: computedBackgroundColor.value,
-}));
-
 const unitBackgroundStyle = computed(() => ({
-    backgroundColor: `${computedTextColor.value}20`,
+    backgroundColor: colors.value.backgroundSecondary,
 }));
 
 const computedButtonBackgroundColor = computed(() => {
-    return props.buttonBackgroundColor || "#222222"; // fallback to dark gray
+    return colors.value.buttonPrimary;
 });
 
 const computedButtonTextColor = computed(() => {
-    if (props.buttonTextColor) return props.buttonTextColor;
-    // Calculate contrast against effective button background
-    const bgColor = computedButtonBackgroundColor.value;
-    return getContrastingTextColor(bgColor);
+    return colors.value.buttonPrimaryText;
 });
 
 const timeLeft = ref({
@@ -162,7 +149,7 @@ watch(
 
 <template>
     <BlockContainer
-        :background-color="computedBackgroundColor"
+        :background-color="colors.backgroundPrimary"
         class="flex min-h-[300px] flex-col items-center justify-center"
     >
         <div

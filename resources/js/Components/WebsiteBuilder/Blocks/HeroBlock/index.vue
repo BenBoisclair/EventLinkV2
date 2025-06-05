@@ -3,6 +3,7 @@ import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.
 import type { HeroBlockProps } from "@/types/blocks";
 import { hexToRgba } from "@/utils/color";
 import { computed, withDefaults } from "vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 const props = withDefaults(
     defineProps<
@@ -13,17 +14,18 @@ const props = withDefaults(
     {
         textPosition: "middle",
         overlayEnabled: false,
-        overlayColor: "#000000",
     }
 );
+
+const { colors, utils } = useThemeColors();
 
 
 
 const showImage = computed(() => !!props.imageUrl);
 
 const backgroundStyle = computed(() => {
-    if (!showImage.value && props.backgroundColor) {
-        return { backgroundColor: props.backgroundColor };
+    if (!showImage.value) {
+        return { backgroundColor: colors.value.backgroundPrimary };
     }
     return {};
 });
@@ -52,28 +54,30 @@ const textAlignClasses = computed(() => {
 });
 
 const overlayStyle = computed(() => {
-    if (!props.overlayEnabled || !props.overlayColor) return {};
-    // Always apply 40% opacity
-    const color = hexToRgba(props.overlayColor, 0.4);
+    if (!props.overlayEnabled) return {};
+    // Always apply 40% opacity using theme primary color
+    const color = utils.addAlpha(colors.value.themePrimary, 0.4);
     return { backgroundColor: color };
 });
 
 const headingStyle = computed(() => {
-    const defaultColor =
-        showImage.value || props.backgroundColor ? "#FFFFFF" : "#000000";
-    return { color: props.headingTextColor || defaultColor };
+    // Use theme-based text color that contrasts with background
+    return { 
+        color: showImage.value ? "#FFFFFF" : colors.value.textPrimary 
+    };
 });
 
 const descriptionStyle = computed(() => {
-    const defaultColor =
-        showImage.value || props.backgroundColor ? "#FFFFFF" : "#000000";
-    return { color: props.descriptionTextColor || defaultColor };
+    // Use theme-based secondary text color that contrasts with background
+    return { 
+        color: showImage.value ? "#FFFFFF" : colors.value.textSecondary 
+    };
 });
 </script>
 
 <template>
     <BlockContainer
-        :background-color="props.backgroundColor"
+        :background-color="showImage ? 'transparent' : colors.backgroundPrimary"
         class="relative p-0"
     >
         <div

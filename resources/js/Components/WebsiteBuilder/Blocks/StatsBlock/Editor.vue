@@ -4,7 +4,6 @@
 import Input from "@/Components/Forms/Input.vue";
 import InputLabel from "@/Components/Forms/InputLabel.vue";
 import Button from "@/Components/UI/Button.vue";
-import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import IconButton from "@/Components/UI/IconButton.vue";
 import Section from "@/Components/UI/Section.vue";
 import type { StatsBlockProps } from "@/types/blocks";
@@ -37,18 +36,6 @@ const {
 
 <template>
     <div v-if="currentProps" class="flex flex-col h-full gap-5">
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
-            <ColorPalettePicker
-                :model-value="currentProps.backgroundColor"
-                @update:model-value="updateProperty('backgroundColor', $event)"
-                label="Background Color"
-            />
-            <ColorPalettePicker
-                :model-value="currentProps.textColor"
-                @update:model-value="updateProperty('textColor', $event)"
-                label="Text Color"
-            />
-        </Section>
 
         <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
             <InputLabel

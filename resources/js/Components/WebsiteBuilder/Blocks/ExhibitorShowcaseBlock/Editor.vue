@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Input from "@/Components/Forms/Input.vue";
 import InputLabel from "@/Components/Forms/InputLabel.vue";
-import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import Section from "@/Components/UI/Section.vue";
 import type { ExhibitorShowcaseBlockProps } from "@/types/blocks";
 import { useBlockEditor } from "@/Composables/useBlockEditor";
@@ -41,17 +40,5 @@ const { currentProps, updateProperty } =
             />
         </Section>
 
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
-            <ColorPalettePicker
-                :model-value="currentProps.titleColor"
-                @update:model-value="updateProperty('titleColor', $event)"
-                label="Title Color"
-            />
-            <ColorPalettePicker
-                :model-value="currentProps.backgroundColor"
-                @update:model-value="updateProperty('backgroundColor', $event)"
-                label="Background Color"
-            />
-        </Section>
     </div>
 </template>

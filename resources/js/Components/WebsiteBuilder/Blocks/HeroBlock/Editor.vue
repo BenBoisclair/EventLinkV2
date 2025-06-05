@@ -3,7 +3,6 @@ import Input from "@/Components/Forms/Input.vue";
 import InputLabel from "@/Components/Forms/InputLabel.vue";
 import Button from "@/Components/UI/Button.vue";
 import Checkbox from "@/Components/UI/Checkbox.vue";
-import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import Section from "@/Components/UI/Section.vue";
 import Upload from "@/Components/UI/Upload.vue";
 import { useBlockEditor } from "@/Composables/useBlockEditor";
@@ -163,11 +162,6 @@ onUnmounted(() => {
                 class="w-full text-sm dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
                 placeholder="Enter heading text"
             />
-            <ColorPalettePicker
-                :model-value="currentProps.headingTextColor || '#000000'"
-                @update:model-value="updateProperty('headingTextColor', $event)"
-                label="Heading Color"
-            />
         </Section>
 
         <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
@@ -249,13 +243,6 @@ onUnmounted(() => {
                     rows="3"
                 ></textarea>
             </div>
-            <ColorPalettePicker
-                :model-value="currentProps.descriptionTextColor || '#000000'"
-                @update:model-value="
-                    updateProperty('descriptionTextColor', $event)
-                "
-                label="Description Color"
-            />
         </Section>
 
         <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
@@ -367,15 +354,6 @@ onUnmounted(() => {
                 </p>
             </div>
 
-            <div v-if="editMode === 'color'" class="space-y-2">
-                <ColorPalettePicker
-                    :model-value="currentProps.backgroundColor || '#000000'"
-                    @update:model-value="
-                        updateProperty('backgroundColor', $event)
-                    "
-                    label="Background Color"
-                />
-            </div>
 
             <!-- Overlay Settings -->
             <div class="pt-2 mt-2 border-t dark:border-dark-border">
@@ -388,16 +366,6 @@ onUnmounted(() => {
                 >
                     Enable Overlay
                 </Checkbox>
-                <div v-if="currentProps.overlayEnabled" class="mt-2">
-                    <ColorPalettePicker
-                        :model-value="overlayColorHex"
-                        @update:model-value="
-                            updateProperty('overlayColor', $event)
-                        "
-                        label="Overlay Color"
-                        defaultColor="#000000"
-                    />
-                </div>
             </div>
         </Section>
     </div>
