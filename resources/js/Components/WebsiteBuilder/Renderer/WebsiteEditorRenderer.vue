@@ -84,10 +84,6 @@ const rendererStyle = computed((): StyleValue => {
                 <template v-for="block in blocks" :key="block.id">
                     <div
                         class="relative"
-                        :class="{
-                            'ring-4 ring-purple-500 rounded-sm overflow-hidden z-50':
-                                currentBlockId === block.id,
-                        }"
                         @mouseenter="handleBlockMouseEnter(block.id)"
                         @mouseleave="handleBlockMouseLeave"
                     >
@@ -97,6 +93,21 @@ const rendererStyle = computed((): StyleValue => {
                             @delete="handleDeleteBlock"
                             @updateBlock="handleUpdateBlock"
                         />
+                        <!-- Darkening overlay for non-selected blocks -->
+                        <div
+                            v-if="currentBlockId && currentBlockId !== block.id"
+                            class="absolute inset-0 z-40 transition-opacity duration-200 pointer-events-none bg-black/30"
+                        />
+                        <div
+                            v-if="currentBlockId === block.id"
+                            class="absolute inset-0 z-50 -my-1 border-[5px] border-purple-500 rounded-sm -mx-4"
+                        >
+                            <!-- <div
+                                class="absolute px-2 py-1 text-sm font-medium text-white -translate-x-1/2 bg-purple-500 rounded-sm -top-7 left-1/2"
+                            >
+                                Block Name
+                            </div> -->
+                        </div>
 
                         <!-- Editor controls overlay -->
                         <div

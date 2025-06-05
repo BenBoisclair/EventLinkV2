@@ -4,19 +4,19 @@
             'group flex items-center justify-center rounded-lg border-solid px-3 py-1.5 transition-colors duration-150 ease-in-out hover:cursor-pointer md:px-4 md:py-2',
             { 'gap-2': text || $slots.default },
             {
-                'border-[2px] border-primary bg-primary text-white hover:bg-primary active:bg-[#11277b]':
+                'border-none bg-primary text-white hover:bg-primary active:bg-[#11277b]':
                     variant === 'primary' && !color,
                 'dark:border-dark-primary dark:bg-dark-primary dark:text-dark-text-primary dark:hover:bg-dark-primary-dimmed dark:active:bg-[#2a41a5]':
                     variant === 'primary' && !color,
-                'border-[2px] border-brand-secondary bg-brand-secondary text-white hover:brightness-95 active:brightness-90':
+                'border-none bg-brand-secondary text-white hover:brightness-95 active:brightness-90':
                     variant === 'secondary' && !color,
                 'dark:border-[#9a34f0] dark:bg-[#9a34f0] dark:hover:brightness-110 dark:active:brightness-125':
                     variant === 'secondary' && !color,
-                'border-[2px] border-danger bg-danger text-white hover:brightness-95 active:brightness-90':
+                'border-none bg-danger text-white hover:brightness-95 active:brightness-90':
                     variant === 'danger' && !color,
                 'dark:border-dark-status-red dark:bg-dark-status-red dark:hover:brightness-110 dark:active:brightness-125':
                     variant === 'danger' && !color,
-                'border-[2px] border-success bg-success text-white hover:brightness-95 active:brightness-90':
+                'border-none bg-success text-white hover:brightness-95 active:brightness-90':
                     variant === 'success' && !color,
                 'dark:border-dark-status-green dark:bg-dark-status-green dark:hover:brightness-110 dark:active:brightness-125':
                     variant === 'success' && !color,

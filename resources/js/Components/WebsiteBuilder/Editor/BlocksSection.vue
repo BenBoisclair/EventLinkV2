@@ -32,7 +32,7 @@ const moveBlockDown = (index: number) => {
     <div>
         <button
             @click="updateBlocks(!isOpen)"
-            class="flex items-center justify-between w-full px-6 py-6 text-sm font-medium transition-colors duration-150 ease-in-out dark:hover:bg-dark-surface-elevated dark:active:bg-dark-surface hover:bg-gray-100 active:bg-gray-200"
+            class="flex items-center justify-between w-full px-6 py-4 text-sm font-medium transition-colors duration-150 ease-in-out dark:hover:bg-dark-surface-elevated dark:active:bg-dark-surface hover:bg-gray-100 active:bg-gray-200"
             :class="{
                 'dark:border-dark-border border-b-[1px] border-border': !isOpen,
             }"

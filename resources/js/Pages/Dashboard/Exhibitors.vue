@@ -13,11 +13,13 @@
                     Manage the exhibitor for your event
                 </p>
             </div>
-        </div>
-
-        <!-- Statistics Card -->
-        <div class="w-full">
-            <StatisticCard :statistic="statistic" />
+            <Button
+                text="Add Exhibitor"
+                icon="$plus"
+                iconType="mdi"
+                variant="primary"
+                @click="showCreateModal = true"
+            />
         </div>
 
         <Spacer />
@@ -30,21 +32,12 @@
                 >
                     Exhibitors
                 </h2>
-                <div class="flex gap-small">
-                    <Button
-                        text="Add Exhibitor"
-                        variant="secondary"
-                        icon="$plus"
-                        @click="showCreateModal = true"
-                    />
-                    <Button
-                        text="Invite Exhibitor"
-                        variant="primary"
-                        icon="$plus"
-                        iconType="mdi"
-                        disabled
-                    />
-                </div>
+                <Button
+                    icon="$refresh"
+                    variant="outline-toned"
+                    @click="refreshExhibitors"
+                    title="Refresh exhibitor list"
+                />
             </div>
 
             <Input
@@ -234,4 +227,12 @@ onUnmounted(() => {
         window.Echo.leaveChannel(`event.${props.event.id}.exhibitors`);
     }
 });
+
+const refreshExhibitors = () => {
+    router.reload({
+        only: ["exhibitors"],
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
 </script>

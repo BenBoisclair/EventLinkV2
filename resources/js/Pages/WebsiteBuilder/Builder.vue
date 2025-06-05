@@ -34,9 +34,9 @@ const { previewDevice, blocks } = storeToRefs(websiteBuilderStore);
 const isMounted = ref(false);
 
 const { sidebarWidth, handleMouseDown } = useResizableSidebar({
-    initialWidth: 432,
+    initialWidth: 300,
     minWidth: 300,
-    maxWidth: 800,
+    maxWidth: 1000,
 });
 
 onMounted(() => {
@@ -56,6 +56,22 @@ onMounted(() => {
     }
 
     isMounted.value = true;
+});
+
+const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    if (websiteBuilderStore.isDirty) {
+        event.preventDefault();
+        return "";
+    }
+};
+
+onMounted(() => {
+    window.addEventListener("beforeunload", handleBeforeUnload);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+    websiteBuilderStore.stopAutoSave();
 });
 
 useWebsiteBuilderEcho(

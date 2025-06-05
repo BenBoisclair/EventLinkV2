@@ -1,4 +1,4 @@
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted, ref } from "vue";
 
 interface ResizableSidebarOptions {
     initialWidth?: number;
@@ -27,9 +27,9 @@ export function useResizableSidebar(options: ResizableSidebarOptions = {}) {
     const handleMouseUp = () => {
         if (isDragging.value) {
             isDragging.value = false;
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-            document.body.style.userSelect = '';
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseup", handleMouseUp);
+            document.body.style.userSelect = "";
         }
     };
 
@@ -37,18 +37,18 @@ export function useResizableSidebar(options: ResizableSidebarOptions = {}) {
         isDragging.value = true;
         startX.value = event.clientX;
         startWidth.value = sidebarWidth.value;
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-        document.body.style.userSelect = 'none';
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+        document.body.style.userSelect = "none";
         event.preventDefault();
     };
 
     // Cleanup listeners on component unmount
     onUnmounted(() => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
         if (isDragging.value) {
-            document.body.style.userSelect = '';
+            document.body.style.userSelect = "";
         }
     });
 

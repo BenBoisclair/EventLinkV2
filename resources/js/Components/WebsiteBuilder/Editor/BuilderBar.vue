@@ -9,6 +9,7 @@ import PublishButton from "@/Components/WebsiteBuilder/Components/PublishButton.
 import { useSaveState } from "@/Composables/useSaveState";
 import { usePublishState } from "@/Composables/usePublishState";
 import { useShareUrl } from "@/Composables/useShareUrl";
+import { router } from "@inertiajs/vue3";
 
 const websiteBuilderStore = useWebsiteBuilderStore();
 
@@ -78,6 +79,10 @@ const handleKeyDown = (event: KeyboardEvent) => {
     }
 };
 
+function handleBackToDashboard() {
+    router.visit(route("dashboard"));
+}
+
 onMounted(() => {
     window.addEventListener("keydown", handleKeyDown);
 });
@@ -93,7 +98,7 @@ onUnmounted(() => {
             class="flex items-center justify-between px-6 py-4 border-b bg-surface dark:bg-dark-surface dark:border-dark-border border-border"
         >
             <div class="flex items-center space-x-4">
-                <v-menu
+                <!-- <v-menu
                     v-model="eventMenu"
                     :close-on-content-click="true"
                     location="bottom start"
@@ -142,16 +147,21 @@ onUnmounted(() => {
                         >
                         </v-list-item>
                     </v-list>
-                </v-menu>
-                <div class="flex items-center ml-4">
-                    <Pill
-                        :text="publishButtonState.statusText"
-                        :variant="publishButtonState.statusVariant"
-                    />
-                </div>
+                </v-menu> -->
+                <Button
+                    variant="outline-primary"
+                    @click="handleBackToDashboard"
+                >
+                    <v-icon icon="$chevronLeft" size="small" />
+                    Back to Dashboard
+                </Button>
             </div>
 
             <div class="flex items-center space-x-4">
+                <Pill
+                    :text="publishButtonState.statusText"
+                    :variant="publishButtonState.statusVariant"
+                />
                 <div
                     class="dark:border-dark-border hidden h-10 items-center overflow-hidden rounded-[6px] border-[1px] border-border md:flex"
                 >
@@ -213,35 +223,41 @@ onUnmounted(() => {
             class="flex items-center h-10 px-6 py-2 border-b bg-gray-50 dark:bg-dark-surface-elevated dark:border-dark-border border-border"
         >
             <div class="flex items-center space-x-1">
-                <v-tooltip location="top">
-                    <template v-slot:activator="{ props: activatorProps }">
-                        <v-btn
-                            icon="$undo"
-                            size="small"
-                            variant="text"
-                            @click="handleUndo"
-                            :disabled="!canUndo"
-                            v-bind="activatorProps"
-                            class="text-gray-600 dark:text-dark-text-secondary"
-                        />
-                    </template>
-                    <span>Undo ({{ isMac ? "⌘" : "Ctrl" }}+Z)</span>
-                </v-tooltip>
-                <v-tooltip location="top">
-                    <template v-slot:activator="{ props: activatorProps }">
-                        <v-btn
-                            icon="$redo"
-                            size="small"
-                            variant="text"
-                            @click="handleRedo"
-                            :disabled="!canRedo"
-                            v-bind="activatorProps"
-                            class="text-gray-600 dark:text-dark-text-secondary"
-                        />
-                    </template>
-                    <span>Redo ({{ isMac ? "⌘+Shift" : "Ctrl+Shift" }}+Z)</span>
-                </v-tooltip>
-                <v-tooltip location="top">
+                <div class="flex items-center -space-x-2">
+                    <v-tooltip location="bottom">
+                        <template v-slot:activator="{ props: activatorProps }">
+                            <v-btn
+                                icon="$undo"
+                                size="small"
+                                variant="text"
+                                @click="handleUndo"
+                                :disabled="!canUndo"
+                                v-bind="activatorProps"
+                                class="text-gray-600 dark:text-dark-text-secondary"
+                            />
+                        </template>
+                        <span>Undo ({{ isMac ? "⌘" : "Ctrl" }}+Z)</span>
+                    </v-tooltip>
+                    <v-tooltip location="bottom">
+                        <template v-slot:activator="{ props: activatorProps }">
+                            <v-btn
+                                icon="$redo"
+                                size="small"
+                                variant="text"
+                                @click="handleRedo"
+                                :disabled="!canRedo"
+                                v-bind="activatorProps"
+                                class="text-gray-600 dark:text-dark-text-secondary"
+                            />
+                        </template>
+                        <span
+                            >Redo ({{
+                                isMac ? "⌘+Shift" : "Ctrl+Shift"
+                            }}+Z)</span
+                        >
+                    </v-tooltip>
+                </div>
+                <v-tooltip location="bottom">
                     <template v-slot:activator="{ props: activatorProps }">
                         <v-btn
                             :icon="saveButtonState.icon"
@@ -256,23 +272,21 @@ onUnmounted(() => {
                     <span>{{ lastUpdatedText || "Save changes" }}</span>
                 </v-tooltip>
             </div>
-            <div class="flex items-center">
-                <transition
-                    enter-active-class="transition-opacity duration-300"
-                    leave-active-class="transition-opacity duration-300"
-                    enter-from-class="opacity-0"
-                    enter-to-class="opacity-100"
-                    leave-from-class="opacity-100"
-                    leave-to-class="opacity-0"
-                >
-                    <span
-                        v-if="websiteBuilderStore.showSavedMessage"
-                        class="text-sm font-medium text-green-600/50 dark:text-green-400/50"
-                    >
-                        Changes Saved.
-                    </span>
-                </transition>
-            </div>
         </div>
     </div>
+
+    <!-- Saved Toast Notification -->
+    <v-snackbar
+        v-model="websiteBuilderStore.showSavedMessage"
+        :timeout="3000"
+        location="bottom center"
+        color="black"
+        rounded="lg"
+        class="mb-8"
+    >
+        <div class="flex items-center justify-center gap-2">
+            <v-icon icon="$check" size="small" />
+            <span class="font-medium">Changes saved.</span>
+        </div>
+    </v-snackbar>
 </template>

@@ -116,7 +116,7 @@ const handleAddBlockSelected = (
 
 <template>
     <div
-        class="bg-surface dark:bg-dark-surface dark:border-dark-border scroll-fade-vertical relative sticky top-[72px] flex flex-col border-r border-border pb-6"
+        class="relative flex flex-col pb-6 border-r bg-surface dark:bg-dark-surface dark:border-dark-border scroll-fade-vertical border-border"
     >
         <div
             v-if="!currentBlockId && !isAddingBlock"

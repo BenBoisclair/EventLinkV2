@@ -51,14 +51,6 @@ const handleManage = () => {
                 class="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 opacity-90"
             />
 
-            <!-- Status Badge -->
-            <div class="absolute right-4 top-4">
-                <Pill
-                    :variant="event.is_active ? 'success' : 'secondary'"
-                    :text="event.is_active ? 'Active' : 'Inactive'"
-                />
-            </div>
-
             <!-- Upcoming/Live Badge -->
             <div v-if="isUpcoming" class="absolute left-4 top-4">
                 <div
@@ -181,25 +173,6 @@ const handleManage = () => {
                         />
                     </svg>
                     Manage
-                </Button>
-                <Button
-                    variant="secondary"
-                    class="border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:border-dark-border dark:hover:border-dark-primary dark:hover:bg-dark-surface-hover"
-                >
-                    <svg
-                        class="w-4 h-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                        />
-                    </svg>
                 </Button>
             </div>
         </div>
