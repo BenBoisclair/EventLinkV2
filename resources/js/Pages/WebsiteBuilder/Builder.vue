@@ -9,7 +9,7 @@ import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { PageProps } from "@/types";
 import type { EventType } from "@/types/event";
 import type { BlockType } from "@/types/blocks";
-import { router, usePage } from "@inertiajs/vue3";
+import { Head, router, usePage } from "@inertiajs/vue3";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useWebsiteBuilderEcho } from "@/Composables/useWebsiteBuilderEcho";
@@ -82,9 +82,6 @@ useWebsiteBuilderEcho(
     }
 );
 
-const hasBlocks = computed(() => blocks.value.length > 0);
-
-// Ref to BuilderSidebar
 const builderSidebarRef = ref<InstanceType<typeof BuilderSidebar> | null>(null);
 
 const handleRequestAddBlock = () => {
@@ -94,6 +91,9 @@ const handleRequestAddBlock = () => {
 
 <template>
     <div class="flex flex-col h-screen overflow-hidden">
+        <Head>
+            <title>Website Builder</title>
+        </Head>
         <BuilderBar />
         <div class="flex flex-1 overflow-hidden">
             <BuilderSidebar

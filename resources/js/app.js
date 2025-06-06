@@ -4,7 +4,8 @@ import "./bootstrap";
 import axios from "axios";
 
 // Ensure CSRF cookie is set before any authenticated API requests
-axios.get("/sanctum/csrf-cookie");
+import { ensureCsrfCookie } from "./utils/csrf.js";
+ensureCsrfCookie();
 
 import { createInertiaApp } from "@inertiajs/vue3";
 import {

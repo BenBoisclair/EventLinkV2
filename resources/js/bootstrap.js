@@ -29,7 +29,7 @@ window.Echo = new Echo({
     enabledTransports: ['ws', 'wss'],
     auth: {
         headers: {
-            Authorization: `Bearer ${document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')}`,
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
         },
     },
 });

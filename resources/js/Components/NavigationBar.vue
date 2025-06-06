@@ -211,6 +211,7 @@ import { useThemeStore } from "@/stores/darkmode"; // Import the theme store
 import { Link, router, usePage } from "@inertiajs/vue3";
 import { ref } from "vue";
 import Avatar from "@/Components/UI/Avatar.vue";
+import { ensureCsrfCookie } from "@/utils/csrf.js";
 
 const page = usePage();
 const auth = page.props.auth;
@@ -218,8 +219,26 @@ const menu = ref(false);
 
 const themeStore = useThemeStore(); // Use the store
 
-const logout = () => {
-    router.post(route("logout"));
+const logout = async () => {
+    try {
+        // Get fresh CSRF cookie before logout
+        await ensureCsrfCookie();
+        
+        // Perform logout
+        router.post(route("logout"), {}, {
+            onError: () => {
+                // Even if logout fails, redirect to login for security
+                window.location.href = route("login");
+            },
+            onFinish: () => {
+                // Force a complete page reload to get fresh CSRF token
+                window.location.href = route("login");
+            }
+        });
+    } catch (error) {
+        // Fallback: redirect to login if CSRF setup fails
+        window.location.href = route("login");
+    }
 };
 </script>
 
