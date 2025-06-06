@@ -1,12 +1,11 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
-import ActionSection from '@/Components/ActionSection.vue';
-import DangerButton from '@/Components/DangerButton.vue';
-import DialogModal from '@/Components/DialogModal.vue';
-import InputError from '@/Components/InputError.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import ActionSection from '@/Components/UI/ActionSection.vue';
+import Button from '@/Components/UI/Button.vue';
+import Modal from '@/Components/UI/Modal.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import TextInput from '@/Components/Forms/Input.vue';
 
 const confirmingUserDeletion = ref(false);
 const passwordInput = ref(null);
@@ -53,13 +52,13 @@ const closeModal = () => {
             </div>
 
             <div class="mt-5">
-                <DangerButton @click="confirmUserDeletion">
+                <Button @click="confirmUserDeletion" variant="danger">
                     Delete Account
-                </DangerButton>
+                </Button>
             </div>
 
             <!-- Delete Account Confirmation Modal -->
-            <DialogModal :show="confirmingUserDeletion" @close="closeModal">
+            <Modal :show="confirmingUserDeletion" @close="closeModal">
                 <template #title>
                     Delete Account
                 </template>
@@ -83,20 +82,21 @@ const closeModal = () => {
                 </template>
 
                 <template #footer>
-                    <SecondaryButton @click="closeModal">
+                    <Button @click="closeModal" variant="secondary">
                         Cancel
-                    </SecondaryButton>
+                    </Button>
 
-                    <DangerButton
+                    <Button
                         class="ms-3"
                         :class="{ 'opacity-25': form.processing }"
                         :disabled="form.processing"
                         @click="deleteUser"
+                        variant="danger"
                     >
                         Delete Account
-                    </DangerButton>
+                    </Button>
                 </template>
-            </DialogModal>
+            </Modal>
         </template>
     </ActionSection>
 </template>

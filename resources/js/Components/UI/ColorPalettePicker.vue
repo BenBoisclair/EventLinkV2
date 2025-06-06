@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import InputLabel from "@/Components/Forms/InputLabel.vue";
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, nextTick } from "vue";
 
 interface Color {
     name: string; // e.g., "Slate 50"
@@ -298,6 +298,7 @@ const props = defineProps<{
     modelValue: string; // Expecting Hex, but might receive Tailwind name initially
     id?: string;
     label?: string;
+    class?: string;
 }>();
 
 const emit = defineEmits<{
@@ -308,6 +309,7 @@ const activeTab = ref<"styles" | "custom">("styles");
 const internalModelValue = ref<string>("#000000"); // Always store Hex
 const customColor = ref("#000000"); // Local state for custom input, always Hex
 const isPickerVisible = ref(false); // State for picker visibility
+const popoverPosition = ref({ top: 0, left: 0 }); // Position for fixed popover
 
 const initializeState = () => {
     const initialValue = props.modelValue;
@@ -472,7 +474,62 @@ const isCustomColorSelected = () => {
     return activeTab.value === "custom";
 };
 
+const calculatePopoverPosition = (buttonRect: DOMRect, popoverHeight: number) => {
+    const popoverWidth = 320; // w-80 = 20rem = 320px
+    const margin = 8;
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const spaceBelow = viewportHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+
+    // Calculate vertical position - default to below
+    let top: number;
+    if (spaceBelow >= popoverHeight + margin) {
+        // Position below (preferred)
+        top = buttonRect.bottom + margin;
+    } else if (spaceAbove >= popoverHeight) {
+        // Position above, directly adjacent
+        top = buttonRect.top - popoverHeight;
+    } else {
+        // Constrained space - choose best available position
+        if (spaceBelow >= 200 || spaceBelow >= spaceAbove * 1.5) {
+            top = Math.min(buttonRect.bottom + margin, viewportHeight - popoverHeight - margin);
+        } else {
+            top = Math.max(margin, buttonRect.top - popoverHeight);
+        }
+    }
+
+    // Calculate horizontal position
+    let left = buttonRect.left;
+    if (left + popoverWidth > viewportWidth - margin) {
+        left = buttonRect.right - popoverWidth;
+    }
+    if (left < margin) {
+        left = margin;
+    }
+
+    return { top, left };
+};
+
 const togglePicker = () => {
+    if (!isPickerVisible.value) {
+        const button = document.getElementById(props.id || "colorSwatchButton");
+        if (button) {
+            const rect = button.getBoundingClientRect();
+            
+            // Show popover first, then calculate position with actual dimensions
+            isPickerVisible.value = true;
+            
+            nextTick(() => {
+                const popover = document.getElementById(`color-picker-popover-${props.id || "default"}`);
+                const popoverHeight = popover?.offsetHeight ?? 400;
+                
+                popoverPosition.value = calculatePopoverPosition(rect, popoverHeight);
+            });
+            
+            return;
+        }
+    }
     isPickerVisible.value = !isPickerVisible.value;
 };
 
@@ -510,8 +567,20 @@ const swatchDisplayText = computed(() => {
 // Close picker when clicking outside
 function handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    // Check if the click is outside the component root element
-    if (!target.closest(`#color-picker-wrapper-${props.id || "default"}`)) {
+    const wrapper = document.getElementById(
+        `color-picker-wrapper-${props.id || "default"}`
+    );
+    const popover = document.getElementById(
+        `color-picker-popover-${props.id || "default"}`
+    );
+
+    // Check if the click is outside both the wrapper and the popover
+    if (
+        wrapper &&
+        !wrapper.contains(target) &&
+        popover &&
+        !popover.contains(target)
+    ) {
         isPickerVisible.value = false;
     }
 }
@@ -532,10 +601,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div
-        :id="`color-picker-wrapper-${id || 'default'}`"
-        class="relative w-full"
-    >
+    <div :id="`color-picker-wrapper-${id || 'default'}`" class="relative">
         <InputLabel
             class="mb-1 dark:text-dark-text-secondary"
             v-if="label"
@@ -545,20 +611,25 @@ onUnmounted(() => {
         <button
             :id="id || 'colorSwatchButton'"
             type="button"
-            class="flex items-center w-full h-8 pl-3 text-left border border-gray-300 rounded dark:border-dark-border"
-            :class="[swatchClass]"
+            class="flex items-center pl-3 text-left border border-gray-300 rounded dark:border-dark-border"
+            :class="[swatchClass, props.class || 'w-14 h-14']"
             :style="swatchStyle"
             @click.stop="togglePicker"
         >
-            <span :class="swatchTextStyleClass" class="text-sm">
+            <!-- <span :class="swatchTextStyleClass" class="text-sm">
                 {{ swatchDisplayText }}
-            </span>
+            </span> -->
         </button>
 
         <!-- Picker Popover -->
         <div
             v-if="isPickerVisible"
-            class="absolute left-0 z-30 w-full max-w-xs mt-2 border border-gray-300 rounded-md shadow-lg bg-surface dark:bg-dark-surface dark:border-dark-border top-full"
+            :id="`color-picker-popover-${id || 'default'}`"
+            class="fixed z-[9999] w-80 border border-gray-300 rounded-md bg-surface dark:bg-dark-surface dark:border-dark-border"
+            :style="{
+                top: popoverPosition.top + 'px',
+                left: popoverPosition.left + 'px',
+            }"
         >
             <!-- Tabs -->
             <div

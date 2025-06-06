@@ -1,57 +1,33 @@
 <script setup lang="ts">
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { StatsBlockProps } from "@/types/blocks";
-import type { DeviceType } from "@/types/websiteBuilder";
-import { computed } from "vue";
+import { computed, withDefaults } from "vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
-const props = withDefaults(
-    defineProps<
-        StatsBlockProps & {
-            isEditorMode?: boolean;
-            device?: DeviceType;
-        }
-    >(),
-    {
-        backgroundColor: undefined,
-        textColor: "#FFFFFF",
-        isEditorMode: false,
-        device: "desktop",
-    }
-);
-
-const emit = defineEmits<{
-    (e: "delete", blockId: string): void;
-}>();
-
-const store = useWebsiteBuilderStore();
-
-const blockStyle = computed(() => {
-    return {
-        backgroundColor: props.backgroundColor,
-        color: props.textColor || "#FFFFFF",
+const props = withDefaults(defineProps<StatsBlockProps & {
+    theme?: {
+        primary: string;
+        secondary: string;
+        accent: string;
+        background: string;
     };
+}>(), {});
+
+const { colors } = useThemeColors(props.theme);
+
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
+    }
+    return props.backgroundColor || colors.value.backgroundPrimary;
 });
-
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
-
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
 </script>
 
 <template>
     <BlockContainer
-        :id="props.id ?? ''"
-        :style="blockStyle"
-        :isEditorMode="props.isEditorMode"
-        @edit="handleEditClick"
-        @delete="handleDelete"
+        :background-color="blockBackgroundColor"
         class="py-12 md:py-16"
+        :style="{ color: colors.textPrimary }"
     >
         <div class="container px-4 mx-auto">
             <div

@@ -1,10 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
-import ActionSection from '@/Components/ActionSection.vue';
-import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import DangerButton from '@/Components/DangerButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
+import ActionSection from '@/Components/UI/ActionSection.vue';
+import Modal from '@/Components/UI/Modal.vue';
+import Button from '@/Components/UI/Button.vue';
 
 const props = defineProps({
     team: Object,
@@ -40,13 +39,13 @@ const deleteTeam = () => {
             </div>
 
             <div class="mt-5">
-                <DangerButton @click="confirmTeamDeletion">
+                <Button @click="confirmTeamDeletion" variant="danger">
                     Delete Team
-                </DangerButton>
+                </Button>
             </div>
 
             <!-- Delete Team Confirmation Modal -->
-            <ConfirmationModal :show="confirmingTeamDeletion" @close="confirmingTeamDeletion = false">
+            <Modal :show="confirmingTeamDeletion" @close="confirmingTeamDeletion = false">
                 <template #title>
                     Delete Team
                 </template>
@@ -56,20 +55,21 @@ const deleteTeam = () => {
                 </template>
 
                 <template #footer>
-                    <SecondaryButton @click="confirmingTeamDeletion = false">
+                    <Button @click="confirmingTeamDeletion = false" variant="secondary">
                         Cancel
-                    </SecondaryButton>
+                    </Button>
 
-                    <DangerButton
+                    <Button
                         class="ms-3"
                         :class="{ 'opacity-25': form.processing }"
                         :disabled="form.processing"
                         @click="deleteTeam"
+                        variant="danger"
                     >
                         Delete Team
-                    </DangerButton>
+                    </Button>
                 </template>
-            </ConfirmationModal>
+            </Modal>
         </template>
     </ActionSection>
 </template>

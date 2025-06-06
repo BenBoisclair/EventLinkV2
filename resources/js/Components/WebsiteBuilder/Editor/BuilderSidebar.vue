@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import SidebarEditorWrapper from "@/Components/WebsiteBuilder/Editor/SidebarEditorWrapper.vue";
+import AddBlockPanel from "@/Components/WebsiteBuilder/Editor/AddBlockPanel.vue";
 import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { Block } from "@/types/websiteBuilder";
 import { storeToRefs } from "pinia";
 import { computed, defineAsyncComponent, ref, shallowRef, watch } from "vue";
 import AddBlockSelector from "./AddBlockSelector.vue";
 import BlocksSection from "./BlocksSection.vue";
+import ThemeSection from "./ThemeSection.vue";
+import StyleSection from "./StyleSection.vue";
 
 const websiteBuilderStore = useWebsiteBuilderStore();
 
@@ -112,35 +115,42 @@ const handleAddBlockSelected = (
     websiteBuilderStore.addBlock(blockType, defaultProps || {});
     hideAddBlockView();
 };
+
+// Expose showAddBlockView to parent
+defineExpose({
+    showAddBlockView,
+});
 </script>
 
 <template>
     <div
-        class="bg-surface dark:bg-dark-surface dark:border-dark-border scroll-fade-vertical relative sticky top-[72px] flex flex-col border-r border-border pb-6"
+        class="relative flex flex-col pb-6 border-r bg-surface dark:bg-dark-surface dark:border-dark-border scroll-fade-vertical border-border transition-[min-width] duration-600 ease-in-out"
+        :style="{
+            minWidth: currentBlockId ? '400px' : undefined,
+        }"
     >
         <div
             v-if="!currentBlockId && !isAddingBlock"
             class="flex flex-col h-full overflow-y-auto"
         >
             <BlocksSection @request-add-block="showAddBlockView" />
+            <ThemeSection />
+            <!-- <StyleSection /> -->
         </div>
 
         <Transition name="slide-editor" mode="out-in">
-            <template v-if="currentBlockId || isAddingBlock">
+            <!-- Block Editing Panel -->
+            <template v-if="currentBlockId">
                 <SidebarEditorWrapper
-                    :editor-title="
-                        currentBlockId ? editorTitle : 'Add New Block'
-                    "
-                    :show-confirm="currentBlockId !== null"
+                    :editor-title="editorTitle"
                     confirm-text="Save Block"
-                    :back-text="currentBlockId ? 'Discard Block' : 'Cancel'"
+                    back-text="Discard Block"
                     @confirm="handleConfirmClick"
                     @back="handleBackClick"
                     class="absolute inset-0 z-10 flex flex-col h-full bg-surface dark:bg-dark-surface"
                 >
                     <template
                         v-if="
-                            currentBlockId &&
                             currentEditorBlock &&
                             websiteBuilderStore.editingBlockProps &&
                             websiteBuilderStore.websiteId
@@ -156,18 +166,14 @@ const handleAddBlockSelected = (
                             class="flex-grow overflow-y-auto"
                         />
                     </template>
-                    <template
-                        v-else-if="
-                            currentBlockId && !websiteBuilderStore.websiteId
-                        "
-                    >
+                    <template v-else-if="!websiteBuilderStore.websiteId">
                         <div
                             class="flex-grow p-4 overflow-y-auto text-sm text-gray-500 dark:text-dark-text-secondary"
                         >
                             Loading website data...
                         </div>
                     </template>
-                    <template v-else-if="currentBlockId">
+                    <template v-else>
                         <div
                             class="flex-grow p-4 overflow-y-auto text-sm text-gray-500 dark:text-dark-text-secondary"
                         >
@@ -185,13 +191,20 @@ const handleAddBlockSelected = (
                             <p>Check the browser console for more details.</p>
                         </div>
                     </template>
-                    <template v-else-if="isAddingBlock">
-                        <AddBlockSelector
-                            class="flex-grow overflow-y-auto"
-                            @select="handleAddBlockSelected"
-                        />
-                    </template>
                 </SidebarEditorWrapper>
+            </template>
+
+            <!-- Add Block Panel -->
+            <template v-else-if="isAddingBlock">
+                <AddBlockPanel
+                    @back="handleBackClick"
+                    class="absolute inset-0 z-10 flex flex-col h-full bg-surface dark:bg-dark-surface"
+                >
+                    <AddBlockSelector
+                        class="flex-grow overflow-y-auto"
+                        @select="handleAddBlockSelected"
+                    />
+                </AddBlockPanel>
             </template>
         </Transition>
     </div>
@@ -206,8 +219,6 @@ const handleAddBlockSelected = (
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--bg-surface, white); /* Fallback */
-    @apply bg-surface dark:bg-dark-surface;
     z-index: 10;
 }
 .slide-editor-enter-from {

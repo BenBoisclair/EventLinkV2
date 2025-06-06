@@ -2,6 +2,7 @@
 
 namespace App\Actions\Jetstream;
 
+use App\Models\Plan;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -27,9 +28,13 @@ class CreateTeam implements CreatesTeams
 
         AddingTeam::dispatch($user);
 
+        $freePlan = Plan::where('slug', 'free')->first();
+
         $user->switchTeam($team = $user->ownedTeams()->create([
             'name' => $input['name'],
             'personal_team' => false,
+            'plan_id' => $freePlan?->id,
+            'billing_cycle' => 'monthly',
         ]));
 
         return $team;

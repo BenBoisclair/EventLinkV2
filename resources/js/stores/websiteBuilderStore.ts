@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { Block, DeviceType } from "@/types/websiteBuilder";
+import type { Block, DeviceType, Theme, Styling } from "@/types/websiteBuilder";
 import type { EventType } from "@/types/event";
 import {
     saveWebsiteData,
@@ -24,6 +24,23 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
     const currentBlockId = ref<string | null>(null);
     const editingBlockProps = ref<any | null>(null);
     const lastUpdatedAt = ref<string | null>(null);
+    const autoSaveInterval = ref<number | null>(null);
+    const showSavedMessage = ref<boolean>(false);
+    const theme = ref<Theme>({
+        primary: "#3b82f6",
+        secondary: "#64748b", 
+        accent: "#f59e0b",
+        background: "#ffffff"
+    });
+    const styling = ref<Styling>({
+        borderRadius: "medium",
+        buttonSize: "md",
+        shadow: "sm",
+        buttonStyle: "solid",
+        animationSpeed: "normal",
+        fontWeight: "medium",
+        letterSpacing: "normal"
+    });
     const currentBlockType = computed(() => {
         if (!currentBlockId.value) return null;
         const block = blocks.value.find((b) => b.id === currentBlockId.value);
@@ -31,6 +48,30 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
     });
 
     // --- Actions ---
+
+    /**
+     * Starts auto-save functionality that saves every 1 minute if there are unsaved changes.
+     */
+    function startAutoSave() {
+        stopAutoSave(); // Clear any existing interval
+        
+        autoSaveInterval.value = window.setInterval(async () => {
+            if (isDirty.value && saveState.value !== "saving") {
+                console.log("Auto-saving website...");
+                await saveWebsite();
+            }
+        }, 60000); // 60 seconds = 1 minute
+    }
+
+    /**
+     * Stops auto-save functionality.
+     */
+    function stopAutoSave() {
+        if (autoSaveInterval.value) {
+            clearInterval(autoSaveInterval.value);
+            autoSaveInterval.value = null;
+        }
+    }
 
     /**
      * Initializes the builder with data from backend or defaults.
@@ -42,6 +83,7 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         isPublished?: boolean;
         event?: EventType;
         lastUpdatedAt?: string;
+        websiteSettings?: any;
     }) {
         websiteId.value = data.websiteId;
         websiteSlug.value = data.websiteSlug ?? null;
@@ -49,11 +91,27 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         isPublished.value = data.isPublished ?? false;
         currentEvent.value = data.event ?? null;
         lastUpdatedAt.value = data.lastUpdatedAt ?? null;
+        theme.value = data.websiteSettings?.theme ?? {
+            primary: "#3b82f6",
+            secondary: "#64748b", 
+            accent: "#f59e0b",
+            background: "#ffffff"
+        };
+        styling.value = data.websiteSettings?.styling ?? {
+            borderRadius: "medium",
+            buttonSize: "md",
+            shadow: "sm",
+            buttonStyle: "solid",
+            animationSpeed: "normal",
+            fontWeight: "medium",
+            letterSpacing: "normal"
+        };
         isDirty.value = false;
         saveState.value = "idle";
         saveError.value = null;
         undoStack.value = [];
         redoStack.value = [];
+        startAutoSave();
     }
 
     /**
@@ -98,6 +156,22 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
     }
 
     /**
+     * Updates theme properties.
+     */
+    function updateTheme(newTheme: Partial<Theme>) {
+        theme.value = { ...theme.value, ...newTheme };
+        isDirty.value = true;
+    }
+
+    /**
+     * Updates styling properties.
+     */
+    function updateStyling(newStyling: Partial<Styling>) {
+        styling.value = { ...styling.value, ...newStyling };
+        isDirty.value = true;
+    }
+
+    /**
      * Saves the website (blocks) to the backend.
      */
     async function saveWebsite() {
@@ -112,7 +186,9 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
             const response = await saveWebsiteData(
                 currentEvent.value.id,
                 websiteId.value,
-                blocks.value
+                blocks.value,
+                theme.value,
+                styling.value
             );
 
             // Optionally update blocks from response
@@ -124,9 +200,13 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
             }
             saveState.value = "saved";
             isDirty.value = false;
+            showSavedMessage.value = true;
             setTimeout(() => {
                 if (saveState.value === "saved") saveState.value = "idle";
             }, 1200);
+            setTimeout(() => {
+                showSavedMessage.value = false;
+            }, 3000);
             return true;
         } catch (error: any) {
             saveError.value = error?.message || "Failed to save website.";
@@ -315,12 +395,18 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         editingBlockProps,
         lastUpdatedAt,
         currentBlockType,
+        autoSaveInterval,
+        showSavedMessage,
+        theme,
+        styling,
 
         // Actions
         initializeBuilder,
         addBlock,
         deleteBlock,
         updateBlock,
+        updateTheme,
+        updateStyling,
         saveWebsite,
         publishWebsite: publishWebsiteAction,
         unpublishWebsite: unpublishWebsiteAction,
@@ -332,5 +418,7 @@ export const useWebsiteBuilderStore = defineStore("websiteBuilder", () => {
         saveBlock,
         discardBlock,
         handleBlockImageProcessed,
+        startAutoSave,
+        stopAutoSave,
     };
 });

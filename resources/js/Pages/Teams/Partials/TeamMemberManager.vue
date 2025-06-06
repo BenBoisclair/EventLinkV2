@@ -1,18 +1,15 @@
 <script setup>
 import { ref } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import ActionMessage from '@/Components/ActionMessage.vue';
-import ActionSection from '@/Components/ActionSection.vue';
-import ConfirmationModal from '@/Components/ConfirmationModal.vue';
-import DangerButton from '@/Components/DangerButton.vue';
-import DialogModal from '@/Components/DialogModal.vue';
-import FormSection from '@/Components/FormSection.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import SectionBorder from '@/Components/SectionBorder.vue';
-import TextInput from '@/Components/TextInput.vue';
+import ActionMessage from '@/Components/UI/ActionMessage.vue';
+import ActionSection from '@/Components/UI/ActionSection.vue';
+import Modal from '@/Components/UI/Modal.vue';
+import Button from '@/Components/UI/Button.vue';
+import FormSection from '@/Components/UI/FormSection.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import InputLabel from '@/Components/Forms/InputLabel.vue';
+import SectionBorder from '@/Components/UI/SectionBorder.vue';
+import TextInput from '@/Components/Forms/Input.vue';
 
 const props = defineProps({
     team: Object,
@@ -167,9 +164,9 @@ const displayableRole = (role) => {
                         Added.
                     </ActionMessage>
 
-                    <PrimaryButton :class="{ 'opacity-25': addTeamMemberForm.processing }" :disabled="addTeamMemberForm.processing">
+                    <Button :class="{ 'opacity-25': addTeamMemberForm.processing }" :disabled="addTeamMemberForm.processing">
                         Add
-                    </PrimaryButton>
+                    </Button>
                 </template>
             </FormSection>
         </div>
@@ -274,7 +271,7 @@ const displayableRole = (role) => {
         </div>
 
         <!-- Role Management Modal -->
-        <DialogModal :show="currentlyManagingRole" @close="currentlyManagingRole = false">
+        <Modal :show="currentlyManagingRole" @close="currentlyManagingRole = false">
             <template #title>
                 Manage Role
             </template>
@@ -313,23 +310,23 @@ const displayableRole = (role) => {
             </template>
 
             <template #footer>
-                <SecondaryButton @click="currentlyManagingRole = false">
+                <Button @click="currentlyManagingRole = false" variant="secondary">
                     Cancel
-                </SecondaryButton>
+                </Button>
 
-                <PrimaryButton
+                <Button
                     class="ms-3"
                     :class="{ 'opacity-25': updateRoleForm.processing }"
                     :disabled="updateRoleForm.processing"
                     @click="updateRole"
                 >
                     Save
-                </PrimaryButton>
+                </Button>
             </template>
-        </DialogModal>
+        </Modal>
 
         <!-- Leave Team Confirmation Modal -->
-        <ConfirmationModal :show="confirmingLeavingTeam" @close="confirmingLeavingTeam = false">
+        <Modal :show="confirmingLeavingTeam" @close="confirmingLeavingTeam = false">
             <template #title>
                 Leave Team
             </template>
@@ -339,23 +336,24 @@ const displayableRole = (role) => {
             </template>
 
             <template #footer>
-                <SecondaryButton @click="confirmingLeavingTeam = false">
+                <Button @click="confirmingLeavingTeam = false" variant="secondary">
                     Cancel
-                </SecondaryButton>
+                </Button>
 
-                <DangerButton
+                <Button
                     class="ms-3"
                     :class="{ 'opacity-25': leaveTeamForm.processing }"
                     :disabled="leaveTeamForm.processing"
                     @click="leaveTeam"
+                    variant="danger"
                 >
                     Leave
-                </DangerButton>
+                </Button>
             </template>
-        </ConfirmationModal>
+        </Modal>
 
         <!-- Remove Team Member Confirmation Modal -->
-        <ConfirmationModal :show="teamMemberBeingRemoved" @close="teamMemberBeingRemoved = null">
+        <Modal :show="teamMemberBeingRemoved" @close="teamMemberBeingRemoved = null">
             <template #title>
                 Remove Team Member
             </template>
@@ -365,19 +363,20 @@ const displayableRole = (role) => {
             </template>
 
             <template #footer>
-                <SecondaryButton @click="teamMemberBeingRemoved = null">
+                <Button @click="teamMemberBeingRemoved = null" variant="secondary">
                     Cancel
-                </SecondaryButton>
+                </Button>
 
-                <DangerButton
+                <Button
                     class="ms-3"
                     :class="{ 'opacity-25': removeTeamMemberForm.processing }"
                     :disabled="removeTeamMemberForm.processing"
                     @click="removeTeamMember"
+                    variant="danger"
                 >
                     Remove
-                </DangerButton>
+                </Button>
             </template>
-        </ConfirmationModal>
+        </Modal>
     </div>
 </template>

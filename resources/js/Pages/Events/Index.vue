@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import CreateEventButton from "@/Components/Events/CreateEventButton.vue";
+import EventCard from "@/Components/Events/EventCard.vue";
+import Button from "@/Components/UI/Button.vue";
 import Container from "@/Components/UI/Container.vue";
 import DashboardLayout from "@/Layouts/DashboardLayout.vue";
 import { useEventStore } from "@/stores/eventStore";
-import type { EventType } from "@/types/event";
-import { formatDate } from "@/utils/date";
+import type { EventType, TeamEventData } from "@/types/event";
 import { router } from "@inertiajs/vue3";
 import { onMounted } from "vue";
 import { route } from "ziggy-js";
@@ -12,6 +12,7 @@ import { storeToRefs } from "pinia";
 
 const props = defineProps<{
     events: EventType[];
+    team_event_data: TeamEventData | null;
 }>();
 
 const eventStore = useEventStore();
@@ -41,57 +42,143 @@ onMounted(() => {
                                 class="text-2xl font-bold dark:text-dark-primary text-primary"
                             >
                                 Your Events
+                                <span
+                                    v-if="props.team_event_data"
+                                    class="ml-2 text-sm font-normal text-gray-500 dark:text-dark-text-secondary"
+                                >
+                                    ({{ props.team_event_data.event_count }}/{{
+                                        props.team_event_data
+                                            .has_unlimited_events
+                                            ? "∞"
+                                            : props.team_event_data.event_limit
+                                    }})
+                                </span>
                             </h1>
                             <p
                                 class="text-sm dark:text-dark-text-secondary text-text-muted"
                             >
                                 View and manage your created events.
+                                <span
+                                    v-if="props.team_event_data?.plan"
+                                    class="font-medium"
+                                >
+                                    {{ props.team_event_data.plan.name }} Plan
+                                </span>
+                                <br v-if="props.team_event_data?.plan" />
+                                <span
+                                    v-if="
+                                        props.team_event_data
+                                            ?.has_unlimited_events
+                                    "
+                                    class="text-green-600 dark:text-green-400"
+                                >
+                                    Unlimited events available.
+                                </span>
+                                <span
+                                    v-else-if="
+                                        props.team_event_data &&
+                                        props.team_event_data.remaining_slots >
+                                            0
+                                    "
+                                >
+                                    You have
+                                    {{ props.team_event_data.remaining_slots }}
+                                    event slot{{
+                                        props.team_event_data
+                                            .remaining_slots === 1
+                                            ? ""
+                                            : "s"
+                                    }}
+                                    remaining.
+                                </span>
+                                <span
+                                    v-else-if="
+                                        props.team_event_data &&
+                                        props.team_event_data
+                                            .remaining_slots === 0
+                                    "
+                                    class="text-orange-600 dark:text-orange-400"
+                                >
+                                    You have reached your event limit.
+                                </span>
                             </p>
                         </div>
+                        <Button
+                            @click="navigateToCreateEvent"
+                            variant="primary"
+                            v-if="
+                                props.team_event_data?.can_create_event !==
+                                false
+                            "
+                            text="Create Event"
+                        >
+                            <span class="flex items-center gap-2">
+                                Create Event
+                                <svg
+                                    class="w-4 h-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                            </span>
+                        </Button>
                     </div>
+
+                    <!-- Separator -->
+                    <div
+                        class="mb-8 border-t border-gray-200 dark:border-dark-border"
+                    ></div>
 
                     <div
                         v-if="storeEvents.length === 0"
-                        class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                        class="flex items-center justify-center py-16"
                     >
-                        <CreateEventButton @create="navigateToCreateEvent" />
+                        <div class="text-center">
+                            <p
+                                class="mb-4 text-gray-500 dark:text-dark-text-secondary"
+                            >
+                                No events created yet. Create your first event
+                                to get started.
+                            </p>
+                            <Button
+                                @click="navigateToCreateEvent"
+                                :variant="
+                                    props.team_event_data?.can_create_event !==
+                                    false
+                                        ? 'outline-primary'
+                                        : 'outline'
+                                "
+                                :disabled="
+                                    props.team_event_data?.can_create_event ===
+                                    false
+                                "
+                                :text="
+                                    props.team_event_data?.can_create_event ===
+                                    false
+                                        ? 'Event Limit Reached'
+                                        : 'Create Your First Event'
+                                "
+                            />
+                        </div>
                     </div>
                     <div
                         v-else
                         class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
                     >
-                        <div
+                        <EventCard
                             v-for="event in props.events"
                             :key="event.id"
-                            @click="navigateToEvent(event.id)"
-                            class="bg-surface dark:bg-dark-surface dark:border-dark-border dark:hover:border-dark-primary h-[200px] cursor-pointer rounded-lg border p-6 transition-shadow hover:border-primary dark:border"
-                        >
-                            <h2
-                                class="mb-2 text-xl font-medium dark:text-dark-primary text-primary"
-                            >
-                                {{ event.name }}
-                            </h2>
-                            <p
-                                class="mb-4 dark:text-dark-text-secondary text-text-muted"
-                            >
-                                {{ event.description || "No description" }}
-                            </p>
-                            <div
-                                class="flex items-center text-sm text-gray-500 dark:text-dark-text-tertiary"
-                            >
-                                <span>{{ formatDate(event.start_date) }}</span>
-                                <span
-                                    v-if="
-                                        formatDate(event.start_date) &&
-                                        formatDate(event.end_date)
-                                    "
-                                    class="mx-2"
-                                    >-</span
-                                >
-                                <span>{{ formatDate(event.end_date) }}</span>
-                            </div>
-                        </div>
-                        <CreateEventButton @create="navigateToCreateEvent" />
+                            :event="event"
+                            @manage="navigateToEvent"
+                        />
                     </div>
                 </Container>
             </div>

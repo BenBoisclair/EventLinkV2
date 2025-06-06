@@ -21,6 +21,9 @@ class Team extends JetstreamTeam
     protected $fillable = [
         'name',
         'personal_team',
+        'event_limit',
+        'plan_id',
+        'billing_cycle',
     ];
 
     /**
@@ -43,7 +46,16 @@ class Team extends JetstreamTeam
     {
         return [
             'personal_team' => 'boolean',
+            'event_limit' => 'integer',
         ];
+    }
+
+    /**
+     * Get the plan that the team belongs to.
+     */
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
     }
 
     /**
@@ -52,5 +64,63 @@ class Team extends JetstreamTeam
     public function events()
     {
         return $this->hasMany(Event::class);
+    }
+
+    /**
+     * Get the current number of events for the team.
+     */
+    public function eventCount(): int
+    {
+        return $this->events()->count();
+    }
+
+    /**
+     * Get the effective event limit for the team.
+     */
+    public function getEventLimit(): int
+    {
+        if ($this->plan) {
+            return $this->plan->getEventLimit();
+        }
+
+        return 1;
+    }
+
+    /**
+     * Check if the team can create more events.
+     */
+    public function canCreateEvent(): bool
+    {
+        $limit = $this->getEventLimit();
+
+        // If limit is PHP_INT_MAX (unlimited), always allow
+        if ($limit === PHP_INT_MAX) {
+            return true;
+        }
+
+        return $this->eventCount() < $limit;
+    }
+
+    /**
+     * Get the remaining event slots for the team.
+     */
+    public function remainingEventSlots(): int
+    {
+        $limit = $this->getEventLimit();
+
+        // If unlimited, return a large number for display
+        if ($limit === PHP_INT_MAX) {
+            return 999;
+        }
+
+        return max(0, $limit - $this->eventCount());
+    }
+
+    /**
+     * Check if the team has unlimited events.
+     */
+    public function hasUnlimitedEvents(): bool
+    {
+        return $this->getEventLimit() === PHP_INT_MAX;
     }
 }

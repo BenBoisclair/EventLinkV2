@@ -13,11 +13,13 @@
                     Manage the exhibitor for your event
                 </p>
             </div>
-        </div>
-
-        <!-- Statistics Card -->
-        <div class="w-full">
-            <StatisticCard :statistic="statistic" />
+            <Button
+                text="Add Exhibitor"
+                icon="$plus"
+                iconType="mdi"
+                variant="primary"
+                @click="showCreateModal = true"
+            />
         </div>
 
         <Spacer />
@@ -28,28 +30,19 @@
                 <h2
                     class="font-bold dark:text-dark-primary text-heading-secondary text-primary"
                 >
-                    Exhibitors
+                    Exhibitor List
                 </h2>
-                <div class="flex gap-small">
-                    <Button
-                        text="Add Exhibitor"
-                        variant="secondary"
-                        icon="$plus"
-                        @click="showCreateModal = true"
-                    />
-                    <Button
-                        text="Invite Exhibitor"
-                        variant="primary"
-                        icon="$plus"
-                        iconType="mdi"
-                        disabled
-                    />
-                </div>
+                <Button
+                    icon="$refresh"
+                    variant="outline-toned"
+                    @click="refreshExhibitors"
+                    title="Refresh exhibitor list"
+                />
             </div>
 
             <Input
                 v-model="searchQuery"
-                placeholder="Search Exhibitor by name, email, company..."
+                placeholder="Search Exhibitors"
                 icon="$magnify"
                 iconType="mdi"
                 class="mt-small max-w-input"
@@ -234,4 +227,12 @@ onUnmounted(() => {
         window.Echo.leaveChannel(`event.${props.event.id}.exhibitors`);
     }
 });
+
+const refreshExhibitors = () => {
+    router.reload({
+        only: ["exhibitors"],
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
 </script>

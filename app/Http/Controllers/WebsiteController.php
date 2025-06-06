@@ -240,7 +240,17 @@ class WebsiteController extends Controller
         foreach ($incomingBlocks as $index => $blockData) {
             $processedBlockData = $this->preprocessBlockData($blockData, $index, $request);
             $block = $this->createOrUpdateBlock($website, $processedBlockData, $index);
-            $this->processPendingFiles($blockData, $index, $request, $website, $block);
+            $this->processPendingFiles($index, $request, $website, $block);
+        }
+
+        // Handle theme data
+        if (isset($validated['theme']) && is_array($validated['theme'])) {
+            $this->updateWebsiteTheme($website, $validated['theme']);
+        }
+
+        // Handle styling data
+        if (isset($validated['styling']) && is_array($validated['styling'])) {
+            $this->updateWebsiteStyling($website, $validated['styling']);
         }
 
         return $this->buildSaveResponse($website);
@@ -305,17 +315,102 @@ class WebsiteController extends Controller
     }
 
     /**
+     * Preprocess request data to convert string booleans to actual booleans.
+     */
+    private function preprocessRequestForValidation(Request $request): void
+    {
+        $allInput = $request->all();
+        
+        if (isset($allInput['blocks']) && is_array($allInput['blocks'])) {
+            foreach ($allInput['blocks'] as $index => $block) {
+                if (isset($block['props']) && is_array($block['props'])) {
+                    $allInput['blocks'][$index]['props'] = $this->convertStringBooleans($block['props']);
+                }
+            }
+            
+            $request->replace($allInput);
+        }
+    }
+
+    /**
      * Validate the save request with dynamic file validation.
      */
     private function validateSaveRequest(Request $request): array
     {
-        $validated = $request->validate([
-            'blocks' => 'present|array',
+        // Convert string booleans BEFORE validation for FormData requests
+        $this->preprocessRequestForValidation($request);
+
+        try {
+            $validated = $request->validate([
+                'blocks' => 'present|array',
             'blocks.*.id' => 'required_with:blocks.*|string',
             'blocks.*.type' => 'required_with:blocks.*|string',
             'blocks.*.props' => 'nullable|array',
-        ]);
-        
+            // Base block properties
+            'blocks.*.props.backgroundColor' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'blocks.*.props.useThemeBackground' => 'nullable|boolean',
+            'blocks.*.props.title' => 'nullable|string',
+            // AttendeesForm block specific properties
+            'blocks.*.props.fields' => 'nullable|array',
+            'blocks.*.props.fields.*.name' => 'nullable|string',
+            'blocks.*.props.fields.*.label' => 'nullable|string',
+            'blocks.*.props.fields.*.type' => 'nullable|string',
+            'blocks.*.props.fields.*.required' => 'nullable|boolean',
+            'blocks.*.props.fields.*.enabled' => 'nullable|boolean',
+            'blocks.*.props.fields.*.deletable' => 'nullable|boolean',
+            'blocks.*.props.fields.*.options' => 'nullable|array',
+            'blocks.*.props.buttonText' => 'nullable|string',
+            // Hero block specific properties
+            'blocks.*.props.imageUrl' => 'nullable|string',
+            'blocks.*.props.altText' => 'nullable|string',
+            'blocks.*.props.headingText' => 'nullable|string',
+            'blocks.*.props.descriptionText' => 'nullable|string',
+            'blocks.*.props.textPosition' => 'nullable|string',
+            'blocks.*.props.overlayEnabled' => 'nullable|boolean',
+            // Description block specific properties
+            'blocks.*.props.description' => 'nullable|string',
+            // Countdown block specific properties
+            'blocks.*.props.startDate' => 'nullable|string',
+            'blocks.*.props.endDate' => 'nullable|string',
+            'blocks.*.props.useEventDates' => 'nullable|boolean',
+            'blocks.*.props.showDays' => 'nullable|boolean',
+            'blocks.*.props.showHours' => 'nullable|boolean',
+            'blocks.*.props.showMinutes' => 'nullable|boolean',
+            'blocks.*.props.showSeconds' => 'nullable|boolean',
+            'blocks.*.props.finishedText' => 'nullable|string',
+            'blocks.*.props.buttonLink' => 'nullable|string',
+            'blocks.*.props.buttonEnabled' => 'nullable|boolean',
+            // Stats block specific properties
+            'blocks.*.props.stats' => 'nullable|array',
+            'blocks.*.props.stats.*.title' => 'nullable|string',
+            'blocks.*.props.stats.*.value' => 'nullable|string',
+            // Canvas block specific properties
+            'blocks.*.props.canvasData' => 'nullable|string',
+            // Icon properties
+            'blocks.*.props.descriptionIcon' => 'nullable|string',
+            // Additional common properties that might be missing
+            'blocks.*.props.websiteId' => 'nullable',
+            'blocks.*.props.event' => 'nullable',
+            'blocks.*.props.id' => 'nullable|string',
+            'blocks.*.props.device' => 'nullable|string',
+            'theme' => 'nullable|array',
+            'theme.primary' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'theme.secondary' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'theme.accent' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'theme.background' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'styling' => 'nullable|array',
+            'styling.borderRadius' => 'nullable|string',
+            'styling.buttonSize' => 'nullable|string',
+            'styling.shadow' => 'nullable|string',
+            'styling.buttonStyle' => 'nullable|string',
+            'styling.animationSpeed' => 'nullable|string',
+            'styling.fontWeight' => 'nullable|string',
+            'styling.letterSpacing' => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        }
+
         // Dynamically validate any pending file fields
         $dynamicRules = [];
         foreach ($request->input('blocks', []) as $index => $block) {
@@ -327,7 +422,7 @@ class WebsiteController extends Controller
                 }
             }
         }
-        
+
         if (!empty($dynamicRules)) {
             $request->validate($dynamicRules);
         }
@@ -341,9 +436,20 @@ class WebsiteController extends Controller
     private function deleteRemovedBlocks(Website $website, array $incomingBlocks): void
     {
         $incomingBlockIds = collect($incomingBlocks)->pluck('id')->filter()->all();
-        
+
         if (!empty($incomingBlockIds)) {
-            $website->blocks()->whereNotIn('id', $incomingBlockIds)->delete();
+            // Filter to only numeric IDs since only persisted blocks have numeric database IDs
+            // New blocks have string IDs like "Stats-1749033341694" and don't exist in DB yet
+            $numericIds = collect($incomingBlockIds)->filter(function($id) {
+                return is_numeric($id);
+            })->all();
+            
+            if (!empty($numericIds)) {
+                $website->blocks()->whereNotIn('id', $numericIds)->delete();
+            } else {
+                // If no existing blocks are being kept, delete all existing blocks
+                $website->blocks()->delete();
+            }
         } else {
             $website->blocks()->delete();
         }
@@ -355,20 +461,20 @@ class WebsiteController extends Controller
     private function preprocessBlockData(array $blockData, int $index, Request $request): array
     {
         $props = $blockData['props'] ?? [];
-        
+
         // Mark files as uploading and remove pending file entries
         foreach (array_keys($props) as $propName) {
             if (str_starts_with($propName, '_pendingFile_')) {
                 $targetPropName = str_replace('_pendingFile_', '', $propName);
                 $fileKey = "blocks.{$index}.props.{$propName}";
-                
+
                 if ($request->hasFile($fileKey)) {
                     $props["_{$targetPropName}_uploadingToS3"] = true;
                     unset($props[$propName]);
                 }
             }
         }
-        
+
         $blockData['props'] = $props;
         return $blockData;
     }
@@ -378,8 +484,17 @@ class WebsiteController extends Controller
      */
     private function createOrUpdateBlock(Website $website, array $blockData, int $index): \App\Models\Block
     {
-        // Convert boolean strings back to actual booleans
-        $props = $this->convertStringBooleans($blockData['props'] ?? []);
+        // Convert boolean strings back to actual booleans and parse JSON strings
+        $originalProps = $blockData['props'] ?? [];
+        if ($blockData['type'] === 'AttendeesForm') {
+            Log::info("AttendeesForm block received props: " . json_encode($originalProps));
+        }
+        
+        $props = $this->convertStringBooleans($originalProps);
+        
+        if ($blockData['type'] === 'AttendeesForm') {
+            Log::info("AttendeesForm block converted props: " . json_encode($props));
+        }
 
         if (!empty($blockData['id']) && is_numeric($blockData['id'])) {
             return $website->blocks()->updateOrCreate(
@@ -409,13 +524,15 @@ class WebsiteController extends Controller
     /**
      * Process pending file uploads for a block.
      */
-    private function processPendingFiles(array $blockData, int $index, Request $request, Website $website, \App\Models\Block $block): void
+    private function processPendingFiles(int $index, Request $request, Website $website, \App\Models\Block $block): void
     {
-        $pendingFiles = $this->extractPendingFiles($blockData, $index, $request);
+        // Use the original request data before preprocessing to extract pending files
+        $originalBlockData = $request->input("blocks.{$index}", []);
+        $pendingFiles = $this->extractPendingFiles($originalBlockData, $index, $request);
 
         foreach ($pendingFiles as $targetPropName => $fileInfo) {
             $imageFile = $fileInfo['file'];
-            
+
             // Store temporarily on local disk
             $extension = $imageFile->getClientOriginalExtension();
             $randomString = substr(md5(uniqid()), 0, 8);
@@ -445,12 +562,12 @@ class WebsiteController extends Controller
     {
         $pendingFiles = [];
         $props = $blockData['props'] ?? [];
-        
+
         foreach (array_keys($props) as $propName) {
             if (str_starts_with($propName, '_pendingFile_')) {
                 $targetPropName = str_replace('_pendingFile_', '', $propName);
                 $fileKey = "blocks.{$index}.props.{$propName}";
-                
+
                 if ($request->hasFile($fileKey)) {
                     $pendingFiles[$targetPropName] = [
                         'file' => $request->file($fileKey),
@@ -459,22 +576,97 @@ class WebsiteController extends Controller
                 }
             }
         }
-        
+
         return $pendingFiles;
     }
 
     /**
-     * Convert string boolean values to actual booleans.
+     * Convert string boolean values to actual booleans and parse JSON-stringified objects/arrays.
+     * Preserves file uploads and other special values.
      */
     private function convertStringBooleans(array $props): array
     {
         foreach ($props as $key => $value) {
-            if (is_string($value) && ($value === 'true' || $value === 'false')) {
-                $props[$key] = $value === 'true';
+            // Skip file uploads and pending file markers
+            if (str_starts_with($key, '_pendingFile_') || $value instanceof \Illuminate\Http\UploadedFile) {
+                continue;
+            }
+            
+            if (is_string($value)) {
+                // Handle boolean strings
+                if ($value === 'true' || $value === 'false') {
+                    $props[$key] = $value === 'true';
+                }
+                // Handle JSON-stringified arrays/objects
+                elseif (str_starts_with($value, '[') || str_starts_with($value, '{')) {
+                    $decoded = json_decode($value, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $props[$key] = $decoded;
+                    }
+                }
             }
         }
-        
+
         return $props;
+    }
+
+    /**
+     * Update the website theme in settings.
+     */
+    private function updateWebsiteTheme(Website $website, array $themeData): void
+    {
+        $settings = $website->settings;
+        
+        // Update theme properties if provided
+        if (isset($themeData['primary'])) {
+            $settings->theme->primary = $themeData['primary'];
+        }
+        if (isset($themeData['secondary'])) {
+            $settings->theme->secondary = $themeData['secondary'];
+        }
+        if (isset($themeData['accent'])) {
+            $settings->theme->accent = $themeData['accent'];
+        }
+        if (isset($themeData['background'])) {
+            $settings->theme->background = $themeData['background'];
+        }
+        
+        $website->settings = $settings;
+        $website->save();
+    }
+
+    /**
+     * Update the website styling in settings.
+     */
+    private function updateWebsiteStyling(Website $website, array $stylingData): void
+    {
+        $settings = $website->settings;
+        
+        // Update styling properties if provided
+        if (isset($stylingData['borderRadius'])) {
+            $settings->styling->borderRadius = $stylingData['borderRadius'];
+        }
+        if (isset($stylingData['buttonSize'])) {
+            $settings->styling->buttonSize = $stylingData['buttonSize'];
+        }
+        if (isset($stylingData['shadow'])) {
+            $settings->styling->shadow = $stylingData['shadow'];
+        }
+        if (isset($stylingData['buttonStyle'])) {
+            $settings->styling->buttonStyle = $stylingData['buttonStyle'];
+        }
+        if (isset($stylingData['animationSpeed'])) {
+            $settings->styling->animationSpeed = $stylingData['animationSpeed'];
+        }
+        if (isset($stylingData['fontWeight'])) {
+            $settings->styling->fontWeight = $stylingData['fontWeight'];
+        }
+        if (isset($stylingData['letterSpacing'])) {
+            $settings->styling->letterSpacing = $stylingData['letterSpacing'];
+        }
+        
+        $website->settings = $settings;
+        $website->save();
     }
 
     /**

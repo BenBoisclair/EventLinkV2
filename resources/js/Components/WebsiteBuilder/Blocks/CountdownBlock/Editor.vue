@@ -3,10 +3,10 @@ import Input from "@/Components/Forms/Input.vue";
 import InputLabel from "@/Components/Forms/InputLabel.vue";
 import Toggle from "@/Components/Forms/Toggle.vue";
 import Checkbox from "@/Components/UI/Checkbox.vue";
-import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import Section from "@/Components/UI/Section.vue";
+import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import type { CountdownBlockProps } from "@/types/blocks";
-import { useBlockEditor } from "@/composables/useBlockEditor";
+import { useBlockEditor } from "@/Composables/useBlockEditor";
 import { type PropType } from "vue";
 
 const props = defineProps({
@@ -31,97 +31,131 @@ const { currentProps, updateProperty } = useBlockEditor<CountdownBlockProps>(
 
 <template>
     <div class="flex flex-col h-full gap-5" v-if="currentProps">
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
-            <InputLabel value="Title" class="dark:text-dark-text-primary" />
+        <div>
+            <InputLabel
+                value="Background Color"
+                class="mb-1 dark:text-dark-text-primary"
+            />
+            <div class="space-y-3">
+                <Toggle
+                    :model-value="currentProps.useThemeBackground ?? true"
+                    @update:model-value="
+                        (value) => {
+                            updateProperty('useThemeBackground', value);
+                            // If switching to custom color and no backgroundColor is set, provide a default
+                            if (!value && !currentProps.backgroundColor) {
+                                updateProperty('backgroundColor', '#3b82f6');
+                            }
+                        }
+                    "
+                    label="Use Theme Color"
+                />
+
+                <div v-if="currentProps.useThemeBackground === false">
+                    <ColorPalettePicker
+                        :model-value="currentProps.backgroundColor || '#3b82f6'"
+                        @update:model-value="
+                            updateProperty('backgroundColor', $event)
+                        "
+                        label="Custom Background Color"
+                        id="countdown-background-color"
+                        class="w-full h-10"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <InputLabel
+                value="Title"
+                class="mb-1 dark:text-dark-text-primary"
+            />
             <Input
                 :model-value="currentProps.title"
                 @update:model-value="updateProperty('title', $event)"
                 class="block w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
             />
-        </Section>
+        </div>
 
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
-            <ColorPalettePicker
-                :model-value="currentProps.textColor"
-                @update:model-value="updateProperty('textColor', $event)"
-                label="Text Color"
-            />
-        </Section>
-
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
-            <div class="flex items-center justify-between">
-                <InputLabel
-                    value="Use Event Dates"
-                    class="dark:text-dark-text-primary"
-                />
-                <Toggle
-                    :model-value="currentProps.useEventDates"
-                    @update:model-value="
-                        updateProperty('useEventDates', $event)
-                    "
-                />
-            </div>
-        </Section>
-
-        <Section class="flex-shrink-0 space-y-4 dark:bg-dark-surface">
-            <div class="text-sm font-medium dark:text-dark-text-primary">
-                Display Units
-            </div>
-            <div
-                v-for="unit in ['Days', 'Hours', 'Minutes', 'Seconds']"
-                :key="unit"
-                class="flex items-center justify-between"
-            >
-                <InputLabel
-                    :value="`Show ${unit}`"
-                    class="dark:text-dark-text-secondary"
-                />
-                <Toggle
-                    :model-value="currentProps[`show${unit}`]"
-                    @update:model-value="updateProperty(`show${unit}`, $event)"
-                />
-            </div>
-        </Section>
-
-        <Section
-            v-if="!currentProps.useEventDates"
-            class="flex-shrink-0 space-y-2 dark:bg-dark-surface"
-        >
-            <InputLabel
-                value="Custom Start Date"
-                class="dark:text-dark-text-primary"
-            />
-            <Input
-                :model-value="currentProps.startDate"
-                @update:model-value="updateProperty('startDate', $event)"
-                type="datetime-local"
-                class="block w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary dark:[color-scheme:dark]"
-            />
-        </Section>
-
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
+        <div>
             <InputLabel
                 value="Finished Countdown Text"
-                class="dark:text-dark-text-primary"
+                class="mb-1 dark:text-dark-text-primary"
             />
             <Input
                 :model-value="currentProps.finishedText"
                 @update:model-value="updateProperty('finishedText', $event)"
                 class="block w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
             />
-        </Section>
+        </div>
 
-        <Section class="flex-shrink-0 space-y-4 dark:bg-dark-surface">
-            <div class="text-sm font-medium dark:text-dark-text-primary">
-                Button Settings
+        <div>
+            <div class="flex items-center justify-between">
+                <InputLabel
+                    value="Use Event Dates"
+                    class="dark:text-dark-text-primary"
+                />
+                <Toggle
+                    :model-value="currentProps.useEventDates ?? true"
+                    @update:model-value="
+                        updateProperty('useEventDates', $event)
+                    "
+                />
             </div>
+        </div>
+
+        <div v-if="!currentProps.useEventDates">
+            <InputLabel
+                value="Custom Start Date"
+                class="mb-1 dark:text-dark-text-primary"
+            />
+            <Input
+                :model-value="currentProps.startDate ?? ''"
+                @update:model-value="updateProperty('startDate', $event)"
+                type="datetime-local"
+                class="block w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary dark:[color-scheme:dark]"
+            />
+        </div>
+
+        <div>
+            <InputLabel
+                value="Display Units"
+                class="mb-1 dark:text-dark-text-primary"
+            />
+            <div
+                class="flex flex-col gap-2 p-2 border rounded-md border-dark-border"
+            >
+                <div
+                    v-for="unit in ['Days', 'Hours', 'Minutes', 'Seconds']"
+                    :key="unit"
+                    class="flex items-center justify-between"
+                >
+                    <InputLabel
+                        :value="`Show ${unit}`"
+                        class="dark:text-dark-text-secondary"
+                    />
+                    <Toggle
+                        :model-value="(currentProps[`show${unit}` as keyof CountdownBlockProps] as boolean) ?? false"
+                        @update:model-value="
+                            updateProperty(`show${unit}`, $event)
+                        "
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- <div>
+            <InputLabel
+                value="Button Settings"
+                class="mb-1 dark:text-dark-text-primary"
+            />
             <div class="flex items-center justify-between">
                 <InputLabel
                     value="Enable Button"
                     class="dark:text-dark-text-primary"
                 />
-                <Checkbox
-                    :model-value="currentProps.buttonEnabled"
+                <Toggle
+                    :model-value="currentProps.buttonEnabled ?? false"
                     @update:model-value="
                         updateProperty('buttonEnabled', $event)
                     "
@@ -150,21 +184,7 @@ const { currentProps, updateProperty } = useBlockEditor<CountdownBlockProps>(
                     placeholder="https://example.com"
                     class="block w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
                 />
-                <ColorPalettePicker
-                    :model-value="currentProps.buttonTextColor"
-                    @update:model-value="
-                        updateProperty('buttonTextColor', $event)
-                    "
-                    label="Button Text Color"
-                />
-                <ColorPalettePicker
-                    :model-value="currentProps.buttonBackgroundColor"
-                    @update:model-value="
-                        updateProperty('buttonBackgroundColor', $event)
-                    "
-                    label="Button Background Color"
-                />
             </template>
-        </Section>
+        </div> -->
     </div>
 </template>

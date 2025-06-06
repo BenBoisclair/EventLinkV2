@@ -5,12 +5,6 @@
             <p class="text-[14px] text-text-muted">
                 Manage the website for your event
             </p>
-            <p
-                v-if="hasWebsite && lastEdited"
-                class="mt-1 text-[12px] text-text-dimmed"
-            >
-                Last edited {{ lastEdited }}
-            </p>
         </div>
 
         <template v-if="isLoading">
@@ -28,18 +22,13 @@
             <Section
                 class="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border-primary/20"
             >
-                <div class="flex flex-col items-center gap-8 lg:flex-row">
-                    <!-- Content Section -->
+                <div class="flex flex-col gap-8">
                     <div class="flex-1">
                         <h2 class="mb-3 text-2xl font-bold text-primary">
                             Website Builder
                         </h2>
-                        <p class="mb-6 text-text-muted">
-                            Create a professional event website with our
-                            intuitive drag-and-drop builder. No coding required!
-                        </p>
 
-                        <div class="flex flex-col gap-4 mb-6 sm:flex-row">
+                        <div class="flex flex-col gap-4 sm:flex-row">
                             <Button
                                 :href="
                                     route('website.builder', {
@@ -70,102 +59,6 @@
                                     class="absolute px-3 py-1 mb-2 text-sm text-white transition-opacity transform -translate-x-1/2 bg-gray-900 rounded opacity-0 pointer-events-none bottom-full left-1/2 dark:bg-gray-700 group-hover:opacity-100 whitespace-nowrap"
                                 >
                                     Publish your website first
-                                </div>
-                            </div>
-                        </div>
-
-                        <div
-                            class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3"
-                        >
-                            <div class="flex items-center gap-2">
-                                <div
-                                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/20"
-                                >
-                                    <svg
-                                        class="w-4 h-4 text-primary"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                                        />
-                                    </svg>
-                                </div>
-                                <span class="text-text-dimmed"
-                                    >Drag & Drop</span
-                                >
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <div
-                                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/20"
-                                >
-                                    <svg
-                                        class="w-4 h-4 text-primary"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                </div>
-                                <span class="text-text-dimmed">Responsive</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <div
-                                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/20"
-                                >
-                                    <svg
-                                        class="w-4 h-4 text-primary"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M13 10V3L4 14h7v7l9-11h-7z"
-                                        />
-                                    </svg>
-                                </div>
-                                <span class="text-text-dimmed">Real-time</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Visual Element -->
-                    <div class="lg:w-[300px] flex-shrink-0">
-                        <div class="relative">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 blur-xl"
-                            ></div>
-                            <div
-                                class="relative p-4 rounded-lg shadow-lg bg-surface dark:bg-dark-surface"
-                            >
-                                <div class="space-y-3">
-                                    <div
-                                        class="h-8 bg-gray-200 rounded dark:bg-gray-700 animate-pulse"
-                                    ></div>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div
-                                            class="h-20 bg-gray-200 rounded dark:bg-gray-700 animate-pulse"
-                                        ></div>
-                                        <div
-                                            class="h-20 bg-gray-200 rounded dark:bg-gray-700 animate-pulse"
-                                        ></div>
-                                    </div>
-                                    <div
-                                        class="h-12 bg-gray-200 rounded dark:bg-gray-700 animate-pulse"
-                                    ></div>
                                 </div>
                             </div>
                         </div>

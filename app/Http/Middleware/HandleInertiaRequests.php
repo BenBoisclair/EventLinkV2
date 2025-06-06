@@ -37,7 +37,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            //
+            // CSRF token is already available in meta tag, no need to expose in props
         ];
     }
 }

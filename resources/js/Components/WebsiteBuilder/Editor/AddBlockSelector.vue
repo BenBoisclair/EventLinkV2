@@ -65,11 +65,6 @@ const handleSelect = (blockType: Block["type"]) => {
                     >
                         {{ option.title }}
                     </p>
-                    <p
-                        class="text-sm text-gray-600 dark:text-dark-text-secondary line-clamp-2"
-                    >
-                        {{ option.description }}
-                    </p>
                 </div>
             </li>
         </ul>

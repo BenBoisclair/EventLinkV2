@@ -5,7 +5,7 @@ export function buildBlockProps(
     block: BlockType,
     editingBlockId: string | null,
     editingBlockProps: Record<string, any> | null,
-    isEditorMode: boolean,
+    _isEditorMode: boolean,
     device: DeviceType,
     event: any,
     websiteId: string | number | undefined
@@ -20,7 +20,6 @@ export function buildBlockProps(
     return {
         ...blockProps,
         id: block.id,
-        isEditorMode,
         device,
         event,
         websiteId,

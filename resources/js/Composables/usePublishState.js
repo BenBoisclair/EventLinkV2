@@ -1,6 +1,6 @@
 import { ref, computed } from "vue";
 
-export function usePublishState(websiteBuilderStore) {
+export function usePublishState(websiteBuilderStore, shareState = null) {
     const isShowingPublishedConfirmation = ref(false);
     const isUnpublishing = ref(false);
 
@@ -10,11 +10,17 @@ export function usePublishState(websiteBuilderStore) {
             isShowingPublishedConfirmation.value
         )
             return;
-            
+
         const success = await websiteBuilderStore.publishWebsite();
-        
+
         if (success) {
             isShowingPublishedConfirmation.value = true;
+
+            // Open share modal on successful publish
+            if (shareState && shareState.isShareModalOpen) {
+                shareState.isShareModalOpen.value = true;
+            }
+
             setTimeout(() => {
                 isShowingPublishedConfirmation.value = false;
             }, 1000);
@@ -32,7 +38,7 @@ export function usePublishState(websiteBuilderStore) {
         setTimeout(async () => {
             await websiteBuilderStore.unpublishWebsite();
             isUnpublishing.value = false;
-        }, 3000);
+        }, 1000);
     };
 
     function getBasePublishState() {

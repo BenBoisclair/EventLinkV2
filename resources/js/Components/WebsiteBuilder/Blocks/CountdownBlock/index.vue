@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import BlockButton from "@/Components/UI/BlockButton.vue";
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { CountdownBlockProps } from "@/types/blocks";
 import type { Event } from "@/types/event";
-import type { DeviceType } from "@/types/websiteBuilder";
-import { getContrastingTextColor } from "@/utils/color";
 import {
     computed,
     onMounted,
@@ -15,12 +12,11 @@ import {
     withDefaults,
 } from "vue";
 import BlockTitle from "../BlockTitle.vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 const props = withDefaults(
     defineProps<
         CountdownBlockProps & {
-            isEditorMode?: boolean;
-            device?: DeviceType;
             useEventDates: boolean;
             event?: Event;
             showDays?: boolean;
@@ -30,70 +26,30 @@ const props = withDefaults(
             finishedText?: string;
             buttonText?: string;
             buttonLink?: string;
-            buttonTextColor?: string;
-            buttonBackgroundColor?: string;
             buttonEnabled?: boolean;
+            theme?: {
+                primary: string;
+                secondary: string;
+                accent: string;
+                background: string;
+            };
         }
     >(),
-    {
-        title: "Countdown",
-        backgroundColor: undefined,
-        textColor: undefined,
-        startDate: undefined,
-        endDate: undefined,
-        useEventDates: false,
-        isEditorMode: false,
-        device: "desktop",
-        event: undefined,
-        showDays: true,
-        showHours: true,
-        showMinutes: true,
-        showSeconds: true,
-        finishedText: "Event has started! 🎉",
-        buttonText: "",
-        buttonLink: "",
-        buttonTextColor: "#FFFFFF",
-        buttonBackgroundColor: undefined,
-        buttonEnabled: false,
-    }
+    {}
 );
 
-const emit = defineEmits<{
-    (e: "delete", blockId: string): void;
-}>();
+const { colors } = useThemeColors(props.theme);
 
-const store = useWebsiteBuilderStore();
-
-// Color logic: use prop, else fallback to sensible default
-const computedBackgroundColor = computed(() => {
-    return props.backgroundColor || "#F5F5F5"; // fallback to light gray
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
+    }
+    return props.backgroundColor || colors.value.backgroundPrimary;
 });
-
-const computedTextColor = computed(() => {
-    if (props.textColor) return props.textColor;
-    // Calculate contrast against effective background
-    const bgColor = computedBackgroundColor.value;
-    return getContrastingTextColor(bgColor);
-});
-
-const blockStyle = computed(() => ({
-    backgroundColor: computedBackgroundColor.value,
-}));
 
 const unitBackgroundStyle = computed(() => ({
-    backgroundColor: `${computedTextColor.value}20`,
+    backgroundColor: colors.value.backgroundSecondary,
 }));
-
-const computedButtonBackgroundColor = computed(() => {
-    return props.buttonBackgroundColor || "#222222"; // fallback to dark gray
-});
-
-const computedButtonTextColor = computed(() => {
-    if (props.buttonTextColor) return props.buttonTextColor;
-    // Calculate contrast against effective button background
-    const bgColor = computedButtonBackgroundColor.value;
-    return getContrastingTextColor(bgColor);
-});
 
 const timeLeft = ref({
     days: 0,
@@ -146,16 +102,6 @@ const calculateTimeLeft = () => {
     }
 };
 
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
-
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
-
 onMounted(() => {
     calculateTimeLeft();
     countdownInterval = window.setInterval(calculateTimeLeft, 1000);
@@ -181,21 +127,17 @@ watch(
 
 <template>
     <BlockContainer
-        :id="props.id"
-        :style="blockStyle"
-        :isEditorMode="props.isEditorMode"
-        @delete="handleDelete"
-        @edit="handleEditClick"
+        :background-color="blockBackgroundColor"
         class="flex min-h-[300px] flex-col items-center justify-center"
     >
         <div
             class="container w-full px-4 mx-auto"
-            :style="{ color: computedTextColor }"
+            :style="{ color: colors.textPrimary }"
         >
             <BlockTitle
                 v-if="!isCountdownFinished"
                 :title="props.title"
-                :title-color="computedTextColor"
+                :title-color="colors.textPrimary"
                 tag="h2"
                 text-align="center"
                 default-classes="mb-6 text-2xl font-bold md:mb-8 md:text-3xl"
@@ -265,8 +207,8 @@ watch(
                 <BlockButton
                     :text="props.buttonText"
                     :href="props.buttonLink"
-                    :color="computedButtonBackgroundColor"
-                    :textColor="computedButtonTextColor"
+                    :color="colors.buttonPrimary"
+                    :textColor="colors.buttonPrimaryText"
                     variant="primary"
                     class="px-5 py-2.5 text-base font-bold md:px-6 md:py-3"
                 />

@@ -1,54 +1,33 @@
 <script setup lang="ts">
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { HeroBlockProps } from "@/types/blocks";
-import type { DeviceType } from "@/types/websiteBuilder";
-import { hexToRgba } from "@/utils/color";
 import { computed, withDefaults } from "vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 const props = withDefaults(
     defineProps<
         HeroBlockProps & {
             websiteId: string | number;
-            isEditorMode?: boolean;
-            device?: DeviceType;
+            theme?: {
+                primary: string;
+                secondary: string;
+                accent: string;
+                background: string;
+            };
         }
     >(),
-    {
-        isEditorMode: false,
-        device: "desktop",
-        textPosition: "middle",
-        overlayEnabled: false,
-        overlayColor: "#000000",
-    }
+    {}
 );
 
-const emit = defineEmits<{
-    (e: "delete", blockId: string): void;
-}>();
-
-const store = useWebsiteBuilderStore();
-
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
-
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
+const { colors, utils } = useThemeColors(props.theme);
 
 const showImage = computed(() => !!props.imageUrl);
 
-const backgroundStyle = computed(() => {
-    if (!showImage.value && props.backgroundColor) {
-        return { backgroundColor: props.backgroundColor };
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
     }
-    if (!showImage.value && !props.backgroundColor && props.isEditorMode) {
-        return { backgroundColor: "#F3F4F6" };
-    }
-    return {};
+    return props.backgroundColor || colors.value.backgroundPrimary;
 });
 
 const textPositionClasses = computed(() => {
@@ -75,37 +54,30 @@ const textAlignClasses = computed(() => {
 });
 
 const overlayStyle = computed(() => {
-    if (!props.overlayEnabled || !props.overlayColor) return {};
-    // Always apply 40% opacity
-    const color = hexToRgba(props.overlayColor, 0.4);
+    if (!props.overlayEnabled) return {};
+    const color = utils.addAlpha(colors.value.themePrimary, 0.4);
     return { backgroundColor: color };
 });
 
-const headingStyle = computed(() => {
-    const defaultColor =
-        showImage.value || props.backgroundColor ? "#FFFFFF" : "#000000";
-    return { color: props.headingTextColor || defaultColor };
-});
-
-const descriptionStyle = computed(() => {
-    const defaultColor =
-        showImage.value || props.backgroundColor ? "#FFFFFF" : "#000000";
-    return { color: props.descriptionTextColor || defaultColor };
+const textStyles = computed(() => {
+    const hasImage = showImage.value;
+    return {
+        heading: {
+            color: hasImage ? "#FFFFFF" : colors.value.textPrimary,
+        },
+        description: {
+            color: hasImage ? "#FFFFFF" : colors.value.textSecondary,
+        },
+    };
 });
 </script>
 
 <template>
     <BlockContainer
-        :id="props.id ?? ''"
-        :is-editor-mode="props.isEditorMode"
-        @edit="handleEditClick"
-        @delete="handleDelete"
+        :background-color="showImage ? 'transparent' : blockBackgroundColor"
         class="relative p-0"
     >
-        <div
-            class="relative aspect-[16/9] w-full overflow-hidden"
-            :style="backgroundStyle"
-        >
+        <div class="relative aspect-[16/9] w-full overflow-hidden">
             <img
                 v-if="showImage"
                 :src="props.imageUrl ?? ''"
@@ -125,13 +97,6 @@ const descriptionStyle = computed(() => {
             ></div>
 
             <div
-                v-if="
-                    !showImage && !props.backgroundColor && props.isEditorMode
-                "
-                class="flex items-center justify-center w-full h-full"
-            ></div>
-
-            <div
                 v-if="props.headingText || props.descriptionText"
                 :class="textPositionClasses"
             >
@@ -142,7 +107,7 @@ const descriptionStyle = computed(() => {
                     <h1
                         v-if="props.headingText"
                         class="text-3xl font-bold leading-tight sm:text-4xl md:text-5xl"
-                        :style="headingStyle"
+                        :style="textStyles.heading"
                     >
                         {{ props.headingText }}
                     </h1>
@@ -162,11 +127,11 @@ const descriptionStyle = computed(() => {
                             :icon="props.descriptionIcon"
                             class="mr-2"
                             size="small"
-                            :color="descriptionStyle.color"
+                            :color="textStyles.description.color"
                         />
                         <p
                             class="text-base sm:text-lg md:text-xl"
-                            :style="descriptionStyle"
+                            :style="textStyles.description"
                         >
                             {{ props.descriptionText }}
                         </p>

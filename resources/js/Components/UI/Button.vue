@@ -4,19 +4,19 @@
             'group flex items-center justify-center rounded-lg border-solid px-3 py-1.5 transition-colors duration-150 ease-in-out hover:cursor-pointer md:px-4 md:py-2',
             { 'gap-2': text || $slots.default },
             {
-                'border-[2px] border-primary bg-primary text-white hover:bg-[#15329a] active:bg-[#11277b]':
+                'border-none bg-primary text-white hover:bg-primary active:bg-[#11277b]':
                     variant === 'primary' && !color,
                 'dark:border-dark-primary dark:bg-dark-primary dark:text-dark-text-primary dark:hover:bg-dark-primary-dimmed dark:active:bg-[#2a41a5]':
                     variant === 'primary' && !color,
-                'border-[2px] border-brand-secondary bg-brand-secondary text-white hover:brightness-95 active:brightness-90':
+                'border-none bg-brand-secondary text-white hover:brightness-95 active:brightness-90':
                     variant === 'secondary' && !color,
                 'dark:border-[#9a34f0] dark:bg-[#9a34f0] dark:hover:brightness-110 dark:active:brightness-125':
                     variant === 'secondary' && !color,
-                'border-[2px] border-danger bg-danger text-white hover:brightness-95 active:brightness-90':
+                'border-none bg-danger text-white hover:brightness-95 active:brightness-90':
                     variant === 'danger' && !color,
                 'dark:border-dark-status-red dark:bg-dark-status-red dark:hover:brightness-110 dark:active:brightness-125':
                     variant === 'danger' && !color,
-                'border-[2px] border-success bg-success text-white hover:brightness-95 active:brightness-90':
+                'border-none bg-success text-white hover:brightness-95 active:brightness-90':
                     variant === 'success' && !color,
                 'dark:border-dark-status-green dark:bg-dark-status-green dark:hover:brightness-110 dark:active:brightness-125':
                     variant === 'success' && !color,
@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { computed, useSlots } from 'vue';
+import { computed, useSlots } from "vue";
 
 const props = defineProps({
     text: {
@@ -84,18 +84,18 @@ const props = defineProps({
     },
     variant: {
         type: String,
-        default: 'primary',
+        default: "primary",
         validator: (value) =>
             [
-                'primary',
-                'secondary',
-                'danger',
-                'success',
-                'outline-primary',
-                'outline-secondary',
-                'outline-danger',
-                'outline-success',
-                'outline-toned',
+                "primary",
+                "secondary",
+                "danger",
+                "success",
+                "outline-primary",
+                "outline-secondary",
+                "outline-danger",
+                "outline-success",
+                "outline-toned",
             ].includes(value),
     },
     href: {
@@ -115,7 +115,7 @@ const props = defineProps({
 const slots = useSlots();
 
 const buttonStyle = computed(() => {
-    const solidVariants = ['primary', 'secondary', 'danger', 'success'];
+    const solidVariants = ["primary", "secondary", "danger", "success"];
     if (props.color && solidVariants.includes(props.variant)) {
         return { backgroundColor: props.color };
     }
@@ -124,16 +124,18 @@ const buttonStyle = computed(() => {
 
 const iconClasses = computed(() => {
     const classes = {};
-    if (props.variant === 'outline-primary') {
-        classes['text-[#193CB8] dark:text-dark-primary'] = true;
-    } else if (props.variant === 'outline-secondary') {
-        classes['text-brand-secondary dark:text-[#b166ff]'] = true;
-    } else if (props.variant === 'outline-danger') {
-        classes['text-danger dark:text-dark-status-red'] = true;
-    } else if (props.variant === 'outline-success') {
-        classes['text-success dark:text-dark-status-green'] = true;
-    } else if (props.variant === 'outline-toned') {
-        classes['text-toned dark:text-dark-text-secondary group-hover:text-white dark:group-hover:text-dark-background'] = true;
+    if (props.variant === "outline-primary") {
+        classes["text-[#193CB8] dark:text-dark-primary"] = true;
+    } else if (props.variant === "outline-secondary") {
+        classes["text-brand-secondary dark:text-[#b166ff]"] = true;
+    } else if (props.variant === "outline-danger") {
+        classes["text-danger dark:text-dark-status-red"] = true;
+    } else if (props.variant === "outline-success") {
+        classes["text-success dark:text-dark-status-green"] = true;
+    } else if (props.variant === "outline-toned") {
+        classes[
+            "text-toned dark:text-dark-text-secondary group-hover:text-white dark:group-hover:text-dark-background"
+        ] = true;
     }
     return classes;
 });

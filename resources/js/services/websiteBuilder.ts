@@ -1,6 +1,6 @@
 import axios from "axios";
 import { route } from "ziggy-js";
-import type { Block } from "@/types/websiteBuilder";
+import type { Block, Theme, Styling } from "@/types/websiteBuilder";
 
 interface SaveWebsiteResponse {
     message: string;
@@ -9,15 +9,18 @@ interface SaveWebsiteResponse {
 }
 
 /**
- * Saves the website blocks for a given website ID.
+ * Saves the website blocks and theme for a given website ID.
  * @param websiteId The ID of the website to save.
  * @param blocks The array of Block objects.
+ * @param theme The theme configuration.
  * @returns A promise that resolves with the save response containing updated blocks.
  */
 export async function saveWebsiteData(
     eventId: number,
     websiteId: number,
-    blocks: Block[]
+    blocks: Block[],
+    theme: Theme,
+    styling?: Styling
 ): Promise<SaveWebsiteResponse> {
     try {
         if (!eventId) {
@@ -55,12 +58,29 @@ export async function saveWebsiteData(
                             if (typeof value === 'string' && value.startsWith('blob:')) {
                                 return;
                             }
-                            // Append other props as strings
-                            formData.append(`blocks[${index}][props][${key}]`, String(value));
+                            // Append other props, properly serialize complex objects
+                            formData.append(`blocks[${index}][props][${key}]`, typeof value === 'object' ? JSON.stringify(value) : String(value));
                         }
                     }
                 });
             });
+
+            // Append theme data
+            formData.append('theme[primary]', theme.primary);
+            formData.append('theme[secondary]', theme.secondary);
+            formData.append('theme[accent]', theme.accent);
+            formData.append('theme[background]', theme.background);
+
+            // Append styling data if provided
+            if (styling) {
+                formData.append('styling[borderRadius]', styling.borderRadius);
+                formData.append('styling[buttonSize]', styling.buttonSize);
+                formData.append('styling[shadow]', styling.shadow);
+                formData.append('styling[buttonStyle]', styling.buttonStyle);
+                formData.append('styling[animationSpeed]', styling.animationSpeed);
+                formData.append('styling[fontWeight]', styling.fontWeight);
+                formData.append('styling[letterSpacing]', styling.letterSpacing);
+            }
 
             const response = await axios.post<SaveWebsiteResponse>(
                 route("website.builder.save", {
@@ -97,6 +117,8 @@ export async function saveWebsiteData(
                 }),
                 {
                     blocks: cleanedBlocks,
+                    theme: theme,
+                    ...(styling && { styling }),
                 }
             );
             return response.data;

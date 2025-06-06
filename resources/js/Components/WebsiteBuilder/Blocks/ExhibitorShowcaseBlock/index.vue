@@ -1,45 +1,39 @@
 <script setup lang="ts">
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
-import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { ExhibitorShowcaseBlockProps } from "@/types/blocks";
 import type { Exhibitor } from "@/types/exhibitor";
-import type { DeviceType } from "@/types/websiteBuilder";
 import axios from "axios";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch, withDefaults } from "vue";
 import { route } from "ziggy-js";
 import ExhibitorBannerDisplay from "../../../Exhibitor/ExhibitorBannerDisplay.vue";
 import ExhibitorCard from "../../../Exhibitor/ExhibitorCard.vue";
 import BlockTitle from "../BlockTitle.vue";
+import { useThemeColors } from "@/Composables/useThemeColors";
 
 interface Props extends ExhibitorShowcaseBlockProps {
     id: string;
-    isEditorMode?: boolean;
-    device?: DeviceType;
     event?: {
         id: number;
         name?: string;
     };
+    theme?: {
+        primary: string;
+        secondary: string;
+        accent: string;
+        background: string;
+    };
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    isEditorMode: false,
-    device: "desktop",
-    title: "Meet Our Exhibitors",
-    titleColor: "#000000",
-    backgroundColor: "#FFFFFF",
-    event: undefined,
+const props = withDefaults(defineProps<Props>(), {});
+
+const { colors } = useThemeColors(props.theme);
+
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
+    }
+    return props.backgroundColor || colors.value.backgroundPrimary;
 });
-
-const emit = defineEmits<{
-    (e: "delete", blockId: string): void;
-    (
-        e: "updateBlock",
-        blockId: string,
-        newProps: Partial<ExhibitorShowcaseBlockProps>
-    ): void;
-}>();
-
-const store = useWebsiteBuilderStore();
 
 const exhibitors = ref<Exhibitor[]>([]);
 const loading = ref(false);
@@ -53,30 +47,15 @@ const fetchExhibitors = async (eventId: number) => {
     error.value = null;
     exhibitors.value = [];
     const apiUrl = route("api.exhibitors.listForEvent", { event: eventId });
-    console.log(`[ExhibitorShowcase] Fetching exhibitors from: ${apiUrl}`);
     try {
         const response = await axios.get<{ data: Exhibitor[] }>(apiUrl);
-        console.log("[ExhibitorShowcase] API Response Received:", response);
         exhibitors.value = response.data?.data ?? [];
-        console.log(
-            `[ExhibitorShowcase] Parsed ${exhibitors.value.length} exhibitors.`
-        );
     } catch (err) {
-        console.error(
-            "[ExhibitorShowcase] Error fetching exhibitors (Full Error):",
-            err
-        );
         if (axios.isAxiosError(err)) {
-            console.error("[ExhibitorShowcase] Axios error details:", {
-                message: err.message,
-                response: err.response?.data,
-                status: err.response?.status,
-            });
             if (err.response?.status === 404) {
                 error.value = "Exhibitor data not found for this event.";
             } else {
-                error.value =
-                    "Failed to load exhibitors. Please check the console for details.";
+                error.value = "Failed to load exhibitors.";
             }
         } else {
             error.value =
@@ -95,8 +74,6 @@ const openExhibitorModal = (exhibitor: Exhibitor) => {
 onMounted(() => {
     if (props.event?.id) {
         fetchExhibitors(props.event.id);
-    } else if (props.isEditorMode) {
-        error.value = "Link an event to display exhibitors.";
     }
 });
 
@@ -105,37 +82,20 @@ watch(
     (newEventId, oldEventId) => {
         if (newEventId && newEventId !== oldEventId) {
             fetchExhibitors(newEventId);
-        } else if (!newEventId && props.isEditorMode) {
-            error.value = "Link an event to display exhibitors.";
+        } else if (!newEventId) {
             exhibitors.value = [];
         }
     },
     { immediate: false }
 );
-
-const handleDelete = () => {
-    if (!props.id) return;
-    emit("delete", props.id);
-};
-
-const handleEditClick = () => {
-    if (!props.id) return;
-    store.beginEditingBlock(props.id);
-};
 </script>
 
 <template>
-    <BlockContainer
-        :id="props.id"
-        :background-color="props.backgroundColor ?? ''"
-        :is-editor-mode="props.isEditorMode"
-        @delete="handleDelete"
-        @edit="handleEditClick"
-    >
+    <BlockContainer :background-color="blockBackgroundColor">
         <div class="px-4 py-16 sm:px-6 lg:px-8">
             <BlockTitle
-                :title="props.title ?? ''"
-                :title-color="props.titleColor ?? ''"
+                :title="props.title || 'Meet Our Exhibitors'"
+                :title-color="colors.textPrimary"
                 default-classes="text-3xl font-bold"
                 text-align="center"
             />
@@ -163,19 +123,12 @@ const handleEditClick = () => {
                     No exhibitors to display yet.
                 </div>
 
-                <div
-                    v-else
-                    class="gap-4"
-                    :class="{
-                        'flex flex-col items-center': props.device === 'mobile',
-                        'grid grid-cols-3': props.device !== 'mobile',
-                    }"
-                >
+                <div v-else class="grid grid-cols-3 gap-4">
                     <ExhibitorCard
                         v-for="exhibitor in exhibitors"
                         :key="exhibitor.id"
                         :exhibitor="exhibitor"
-                        :card-background-color="props.backgroundColor ?? ''"
+                        :card-background-color="colors.backgroundPrimary"
                         @click="openExhibitorModal(exhibitor)"
                     />
                 </div>
@@ -186,6 +139,6 @@ const handleEditClick = () => {
     <ExhibitorBannerDisplay
         v-model="isModalOpen"
         :exhibitor="selectedExhibitor"
-        :background-color="props.backgroundColor ?? ''"
+        :background-color="colors.backgroundPrimary"
     />
 </template>

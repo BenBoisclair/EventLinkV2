@@ -7,6 +7,6 @@
 
 <script setup lang="ts">
 defineEmits<{
-    (e: 'mousedown', event: MouseEvent): void;
+    (e: "mousedown", event: MouseEvent): void;
 }>();
 </script>

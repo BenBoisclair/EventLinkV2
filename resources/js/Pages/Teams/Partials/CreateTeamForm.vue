@@ -1,10 +1,10 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import FormSection from '@/Components/FormSection.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import FormSection from '@/Components/UI/FormSection.vue';
+import InputError from '@/Components/Forms/InputError.vue';
+import InputLabel from '@/Components/Forms/InputLabel.vue';
+import Button from '@/Components/UI/Button.vue';
+import TextInput from '@/Components/Forms/Input.vue';
 
 const form = useForm({
     name: '',
@@ -58,9 +58,9 @@ const createTeam = () => {
         </template>
 
         <template #actions>
-            <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+            <Button :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                 Create
-            </PrimaryButton>
+            </Button>
         </template>
     </FormSection>
 </template>

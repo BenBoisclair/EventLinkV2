@@ -2,14 +2,14 @@
 import ResizableHandle from "@/Components/UI/ResizableHandle.vue";
 import BuilderSidebar from "@/Components/WebsiteBuilder/Editor/BuilderSidebar.vue";
 import BuilderBar from "@/Components/WebsiteBuilder/Editor/BuilderBar.vue";
-import WebsiteRenderer from "@/Components/WebsiteBuilder/Renderer/WebsiteRenderer.vue";
+import WebsiteEditorRenderer from "@/Components/WebsiteBuilder/Renderer/WebsiteEditorRenderer.vue";
 import { useResizableSidebar } from "@/Composables/useResizableSidebar";
 import { useEventStore } from "@/stores/eventStore";
 import { useWebsiteBuilderStore } from "@/stores/websiteBuilderStore";
 import type { PageProps } from "@/types";
 import type { EventType } from "@/types/event";
 import type { BlockType } from "@/types/blocks";
-import { router, usePage } from "@inertiajs/vue3";
+import { Head, router, usePage } from "@inertiajs/vue3";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useWebsiteBuilderEcho } from "@/Composables/useWebsiteBuilderEcho";
@@ -34,9 +34,9 @@ const { previewDevice, blocks } = storeToRefs(websiteBuilderStore);
 const isMounted = ref(false);
 
 const { sidebarWidth, handleMouseDown } = useResizableSidebar({
-    initialWidth: 432,
+    initialWidth: 300,
     minWidth: 300,
-    maxWidth: 800,
+    maxWidth: 1000,
 });
 
 onMounted(() => {
@@ -47,6 +47,7 @@ onMounted(() => {
         isPublished: page.props.isPublished,
         event: page.props.event,
         lastUpdatedAt: page.props.lastUpdatedAt,
+        websiteSettings: page.props.websiteSettings,
     });
 
     if (page.props.event) {
@@ -58,6 +59,22 @@ onMounted(() => {
     isMounted.value = true;
 });
 
+const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    if (websiteBuilderStore.isDirty) {
+        event.preventDefault();
+        return "";
+    }
+};
+
+onMounted(() => {
+    window.addEventListener("beforeunload", handleBeforeUnload);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+    websiteBuilderStore.stopAutoSave();
+});
+
 useWebsiteBuilderEcho(
     page.props.websiteId ?? null,
     (eventData: { blockId: string; imageUrl: string; propName: string }) => {
@@ -65,22 +82,22 @@ useWebsiteBuilderEcho(
     }
 );
 
-const handleDeleteBlock = (blockId: string) => {
-    websiteBuilderStore.deleteBlock(blockId);
-};
+const builderSidebarRef = ref<InstanceType<typeof BuilderSidebar> | null>(null);
 
-const handleUpdateBlock = (blockId: string, newProps: Record<string, any>) => {
-    websiteBuilderStore.updateBlock(blockId, newProps);
+const handleRequestAddBlock = () => {
+    builderSidebarRef.value?.showAddBlockView();
 };
-
-const hasBlocks = computed(() => blocks.value.length > 0);
 </script>
 
 <template>
     <div class="flex flex-col h-screen overflow-hidden">
+        <Head>
+            <title>Website Builder</title>
+        </Head>
         <BuilderBar />
         <div class="flex flex-1 overflow-hidden">
             <BuilderSidebar
+                ref="builderSidebarRef"
                 :style="{ width: `${sidebarWidth}px` }"
                 class="flex-shrink-0 h-full overflow-y-auto"
             />
@@ -98,18 +115,10 @@ const hasBlocks = computed(() => blocks.value.length > 0);
                             previewDevice === 'mobile' ? '667px' : 'auto',
                     }"
                 >
-                    <WebsiteRenderer
-                        :blocks="blocks"
-                        :is-editor-mode="true"
-                        :device="previewDevice"
-                        :editing-block-id="websiteBuilderStore.currentBlockId"
-                        :editing-block-props="
-                            websiteBuilderStore.editingBlockProps
-                        "
+                    <WebsiteEditorRenderer
                         :event="page.props.event"
-                        @delete-block="handleDeleteBlock"
-                        @update-block="handleUpdateBlock"
                         class="rounded-md shadow-lg"
+                        @request-add-block="handleRequestAddBlock"
                     />
                 </div>
             </div>

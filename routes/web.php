@@ -5,14 +5,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
-// Route::get('/', function () {
-//     return Inertia::render('Dashboard', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-// });
+Route::get('/', function () {
+    return redirect()->route('dashboard');
+});
 
 Route::middleware([
     'auth:sanctum',
@@ -64,6 +59,7 @@ Route::middleware([
 
     Route::post('/organiser/events', [\App\Http\Controllers\EventController::class, 'store'])->name('organiser.events.store');
     Route::patch('/organiser/events/{event}', [\App\Http\Controllers\EventController::class, 'update'])->name('organiser.event.update');
+    Route::delete('/organiser/events/{event}', [\App\Http\Controllers\EventController::class, 'destroy'])->name('organiser.event.destroy');
 
     Route::post('/events/{event}/website/{website}/save', [\App\Http\Controllers\WebsiteController::class, 'save'])
         ->name('website.builder.save');
@@ -81,20 +77,20 @@ Route::middleware([
     // Attendee management routes
     Route::post('/organiser/events/{event}/attendees', [\App\Http\Controllers\AttendeeController::class, 'store'])
         ->name('organiser.event.attendees.store');
-    
+
     Route::patch('/organiser/events/{event}/attendees/{attendee}', [\App\Http\Controllers\AttendeeController::class, 'update'])
         ->name('organiser.event.attendees.update');
-    
+
     Route::delete('/organiser/events/{event}/attendees/{attendee}', [\App\Http\Controllers\AttendeeController::class, 'destroy'])
         ->name('organiser.event.attendees.destroy');
 
     // Exhibitor management routes
     Route::post('/organiser/events/{event}/exhibitors', [\App\Http\Controllers\ExhibitorController::class, 'store'])
         ->name('organiser.event.exhibitors.store');
-    
+
     Route::patch('/organiser/events/{event}/exhibitors/{exhibitor}', [\App\Http\Controllers\ExhibitorController::class, 'update'])
         ->name('organiser.event.exhibitors.update');
-    
+
     Route::delete('/organiser/events/{event}/exhibitors/{exhibitor}', [\App\Http\Controllers\ExhibitorController::class, 'destroy'])
         ->name('organiser.event.exhibitors.destroy');
 
