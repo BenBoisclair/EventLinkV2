@@ -8,7 +8,7 @@ import { ref } from "vue";
 const websiteBuilderStore = useWebsiteBuilderStore();
 const { theme } = storeToRefs(websiteBuilderStore);
 
-const isOpen = ref(true);
+const isOpen = ref(false);
 
 const updateTheme = (value: boolean) => {
     isOpen.value = value;

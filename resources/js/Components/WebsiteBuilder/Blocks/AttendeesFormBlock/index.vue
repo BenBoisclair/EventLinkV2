@@ -4,6 +4,7 @@ import BlockInputLabel from "@/Components/Forms/BlockInputLabel.vue";
 import BlockButton from "@/Components/UI/BlockButton.vue";
 import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.vue";
 import type { AttendeesFormBlockProps } from "@/types/blocks";
+import type { PageProps } from "@/types/index";
 import { useForm, usePage } from "@inertiajs/vue3";
 import { computed, onMounted, ref, withDefaults, watch, reactive } from "vue";
 import BlockTitle from "../BlockTitle.vue";
@@ -18,19 +19,18 @@ interface Props extends AttendeesFormBlockProps {
     };
 }
 
-const props = withDefaults(
-    defineProps<Props>(),
-    {
-        title: "Register for the Event",
-        buttonText: "Submit",
-    }
-);
+const props = withDefaults(defineProps<Props>(), {});
 
 const { colors } = useThemeColors(props.theme);
 
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
+    }
+    return props.backgroundColor || colors.value.backgroundPrimary;
+});
 
-const page = usePage();
-
+const page = usePage<PageProps>();
 
 const enabledFields = computed(() => {
     return Array.isArray(props.fields)
@@ -38,10 +38,8 @@ const enabledFields = computed(() => {
         : [];
 });
 
-// Create reactive form data object
 const formData = reactive<Record<string, any>>({});
 
-// Initialize form data when fields change
 const updateFormData = () => {
     enabledFields.value.forEach((field) => {
         if (!(field.name in formData)) {
@@ -49,7 +47,6 @@ const updateFormData = () => {
         }
     });
 
-    // Remove fields that no longer exist
     Object.keys(formData).forEach((key) => {
         if (!enabledFields.value.some((field) => field.name === key)) {
             delete formData[key];
@@ -57,24 +54,17 @@ const updateFormData = () => {
     });
 };
 
-// We'll create the form dynamically on submit
 let form: any = null;
 
-// Track submission success state
 const isSubmitted = ref(false);
 
-// Editor functionality is now handled by WebsiteEditorRenderer
-
-// Watch for field changes and update form data
 watch(enabledFields, updateFormData, { deep: true, immediate: true });
 
 const handleSubmit = () => {
-
     if (!props.id || !props.event?.id) {
         return;
     }
 
-    // Create form with current data including block ID
     const submitData = {
         ...formData,
         _block_id: props.id,
@@ -85,23 +75,17 @@ const handleSubmit = () => {
     form.post(`/events/${props.event.id}/attendees/register`, {
         preserveScroll: true,
         onSuccess: () => {
-            // Clear the form data
             Object.keys(formData).forEach((key) => {
                 formData[key] = "";
             });
 
-            // Show success state with a slight delay for impact
             setTimeout(() => {
                 isSubmitted.value = true;
             }, 100);
 
-            // Reset success state after 3 seconds
             setTimeout(() => {
                 isSubmitted.value = false;
             }, 1000);
-        },
-        onError: (errors) => {
-            // Errors are automatically handled by Inertia and available in form.errors
         },
     });
 };
@@ -109,23 +93,20 @@ const handleSubmit = () => {
 
 <template>
     <BlockContainer
-        :background-color="colors.backgroundPrimary"
+        :background-color="blockBackgroundColor"
         class="py-12 md:py-16"
     >
         <div class="container px-8 mx-auto" id="register">
             <div class="max-w-lg mx-auto md:max-w-2xl">
                 <BlockTitle
-                    :title="props.title"
+                    :title="props.title || 'Register for the Event'"
                     :title-color="colors.textPrimary"
                     tag="h2"
                     text-align="center"
                     default-classes="mb-6 text-xl font-bold md:mb-8 md:text-3xl"
                 />
                 <p
-                    v-if="
-                        !enabledFields ||
-                        enabledFields.length === 0
-                    "
+                    v-if="!enabledFields || enabledFields.length === 0"
                     class="italic text-center text-gray-500"
                 >
                     No form fields configured.
@@ -177,9 +158,9 @@ const handleSubmit = () => {
                     >
                         <div
                             v-for="(error, fieldName) in form?.errors || {}"
-                            :key="fieldName"
+                            :key="String(fieldName)"
                         >
-                            <span v-if="fieldName !== 'message'">{{
+                            <span v-if="String(fieldName) !== 'message'">{{
                                 error
                             }}</span>
                         </div>
@@ -198,11 +179,7 @@ const handleSubmit = () => {
                             isSubmitted ? 'Sent!' : props.buttonText || 'Submit'
                         "
                         :variant="isSubmitted ? 'success' : 'primary'"
-                        :color="
-                            isSubmitted
-                                ? '#10b981'
-                                : colors.buttonPrimary
-                        "
+                        :color="isSubmitted ? '#10b981' : colors.buttonPrimary"
                         :style="{
                             color: isSubmitted
                                 ? '#FFFFFF'
@@ -218,10 +195,7 @@ const handleSubmit = () => {
                             'mt-12':
                                 !form?.hasErrors && !page.props.flash?.success,
                         }"
-                        :disabled="
-                            form?.processing ||
-                            isSubmitted
-                        "
+                        :disabled="form?.processing || isSubmitted"
                         :loading="form?.processing"
                     >
                     </BlockButton>

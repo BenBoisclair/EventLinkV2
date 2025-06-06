@@ -3,12 +3,14 @@ import Input from "@/Components/Forms/Input.vue";
 import InputLabel from "@/Components/Forms/InputLabel.vue";
 import Button from "@/Components/UI/Button.vue";
 import Checkbox from "@/Components/UI/Checkbox.vue";
-import Section from "@/Components/UI/Section.vue";
+import Toggle from "@/Components/Forms/Toggle.vue";
 import Upload from "@/Components/UI/Upload.vue";
+import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import { useBlockEditor } from "@/Composables/useBlockEditor";
 import type { HeroBlockProps } from "@/types/blocks";
 import { rgbaToHex } from "@/utils/color";
 import { computed, ref, onMounted, onUnmounted, type PropType } from "vue";
+import Spacer from "@/Components/UI/Spacer.vue";
 
 const props = defineProps({
     initialProps: {
@@ -54,16 +56,6 @@ const availableIconsMap: Record<string, string> = {
 };
 const availableIcons = Object.keys(availableIconsMap);
 
-// Handle color conversion for overlay
-const overlayColorHex = computed(() => {
-    const color = currentProps.value?.overlayColor;
-    if (!color) return "#000000";
-    if (color.startsWith("rgba")) {
-        return rgbaToHex(color);
-    }
-    return color;
-});
-
 // Preview URL for selected file
 const previewImageUrl = computed(() => {
     if (selectedFile.value) {
@@ -85,6 +77,15 @@ const handleFileSelect = (event: Event): void => {
     if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
         uploadError.value = true;
         uploadErrorMessage.value = "Please select a PNG, JPG, or JPEG file.";
+        selectedFile.value = null;
+        if (fileInputRef.value) fileInputRef.value.value = "";
+        return;
+    }
+
+    // Check file size (10MB = 10,485,760 bytes)
+    if (file.size > 10485760) {
+        uploadError.value = true;
+        uploadErrorMessage.value = "File size must be 10MB or smaller.";
         selectedFile.value = null;
         if (fileInputRef.value) fileInputRef.value.value = "";
         return;
@@ -114,7 +115,10 @@ const selectTextPosition = (position: HeroBlockProps["textPosition"]) => {
 
 const switchToImageMode = () => {
     editMode.value = "image";
+    // Only clear backgroundColor when actually switching to image mode
+    // Don't clear it if we're just toggling the theme background setting
     updateProperty("backgroundColor", null);
+    updateProperty("useThemeBackground", null);
 };
 
 const switchToColorMode = () => {
@@ -126,20 +130,31 @@ const switchToColorMode = () => {
     }
     updateProperty("imageUrl", null);
     updateProperty("_pendingFile_imageUrl", null);
+    // Set defaults for color mode if not already set
+    if (currentProps.value?.useThemeBackground === undefined) {
+        updateProperty("useThemeBackground", true); // Default to theme background
+    }
+    if (
+        !currentProps.value?.backgroundColor &&
+        !currentProps.value?.useThemeBackground
+    ) {
+        updateProperty("backgroundColor", "#3b82f6"); // Default blue color
+    }
     selectedFile.value = null;
     if (fileInputRef.value) fileInputRef.value.value = "";
 };
 
-// Initialize edit mode based on current props
 onMounted(() => {
-    if (currentProps.value?.imageUrl || currentProps.value?._pendingFile_imageUrl) {
+    if (
+        currentProps.value?.imageUrl ||
+        currentProps.value?._pendingFile_imageUrl
+    ) {
         editMode.value = "image";
     } else {
         editMode.value = "color";
     }
 });
 
-// Clean up any object URLs when component unmounts
 onUnmounted(() => {
     const currentImageUrl = currentProps.value?.imageUrl;
     if (currentImageUrl && currentImageUrl.startsWith("blob:")) {
@@ -150,7 +165,7 @@ onUnmounted(() => {
 
 <template>
     <div v-if="currentProps" class="flex flex-col h-full gap-5">
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
+        <div>
             <InputLabel
                 value="Heading Text"
                 class="mb-1 dark:text-dark-text-primary"
@@ -162,9 +177,9 @@ onUnmounted(() => {
                 class="w-full text-sm dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
                 placeholder="Enter heading text"
             />
-        </Section>
+        </div>
 
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
+        <div>
             <InputLabel
                 value="Description Text"
                 class="mb-1 dark:text-dark-text-primary"
@@ -238,14 +253,14 @@ onUnmounted(() => {
                             ($event.target as HTMLTextAreaElement).value
                         )
                     "
-                    class="dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary dark:focus:ring-dark-primary w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    class="dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary dark:focus:ring-dark-primary w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
                     placeholder="Enter description text"
                     rows="3"
                 ></textarea>
             </div>
-        </Section>
+        </div>
 
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
+        <div>
             <InputLabel
                 value="Text Position"
                 class="mb-1 dark:text-dark-text-primary"
@@ -278,12 +293,12 @@ onUnmounted(() => {
                     <span class="w-2 h-2 bg-current rounded-full"></span>
                 </button>
             </div>
-        </Section>
+        </div>
 
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
+        <div>
             <InputLabel
                 value="Background"
-                class="dark:text-dark-text-primary"
+                class="mb-1 dark:text-dark-text-primary"
             />
             <div
                 class="flex p-1 space-x-1 border rounded-md dark:bg-dark-surface-elevated dark:border-dark-border bg-gray-50"
@@ -352,21 +367,45 @@ onUnmounted(() => {
                 >
                     {{ uploadErrorMessage }}
                 </p>
-            </div>
+                <Spacer />
 
-
-            <!-- Overlay Settings -->
-            <div class="pt-2 mt-2 border-t dark:border-dark-border">
-                <Checkbox
-                    :model-value="currentProps.overlayEnabled"
+                <Toggle
+                    :model-value="currentProps.overlayEnabled ?? false"
                     @update:model-value="
                         updateProperty('overlayEnabled', $event)
                     "
-                    label-class="dark:text-dark-text-primary"
-                >
-                    Enable Overlay
-                </Checkbox>
+                    label="Enable Overlay"
+                />
             </div>
-        </Section>
+
+            <div v-if="editMode === 'color'" class="space-y-3">
+                <Toggle
+                    :model-value="currentProps.useThemeBackground ?? true"
+                    @update:model-value="
+                        (value) => {
+                            updateProperty('useThemeBackground', value);
+                            // If switching to custom color and no backgroundColor is set, provide a default
+                            if (!value && !currentProps.backgroundColor) {
+                                updateProperty('backgroundColor', '#3b82f6');
+                            }
+                        }
+                    "
+                    label="Use Theme Color"
+                    class="mt-2"
+                />
+
+                <div v-if="currentProps.useThemeBackground === false">
+                    <ColorPalettePicker
+                        :model-value="currentProps.backgroundColor || '#3b82f6'"
+                        @update:model-value="
+                            updateProperty('backgroundColor', $event)
+                        "
+                        label="Custom Background Color"
+                        id="hero-background-color"
+                        class="w-full h-10"
+                    />
+                </div>
+            </div>
+        </div>
     </div>
 </template>

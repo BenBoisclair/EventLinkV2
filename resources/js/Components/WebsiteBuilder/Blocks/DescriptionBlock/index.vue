@@ -20,11 +20,18 @@ const props = withDefaults(
 );
 
 const { colors } = useThemeColors(props.theme);
+
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
+    }
+    return props.backgroundColor || colors.value.backgroundPrimary;
+});
 </script>
 
 <template>
     <BlockContainer
-        :background-color="colors.backgroundPrimary"
+        :background-color="blockBackgroundColor"
         class="px-6 py-12 sm:px-8 md:px-16 md:py-16"
     >
         <div class="max-w-3xl mx-auto">

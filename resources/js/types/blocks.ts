@@ -4,6 +4,8 @@ import type { DeviceType } from "@/types/websiteBuilder";
 export interface BaseBlockProps {
     id?: string;
     device?: DeviceType;
+    backgroundColor?: string | null;
+    useThemeBackground?: boolean;
 }
 
 export interface HeroBlockProps extends BaseBlockProps {

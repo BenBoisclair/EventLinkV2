@@ -119,7 +119,11 @@ const emit = defineEmits<{
 
                         <!-- Editor controls overlay -->
                         <div
-                            v-if="hoveredBlockId === block.id"
+                            v-if="
+                                hoveredBlockId === block.id &&
+                                currentBlockId !== block.id &&
+                                editingBlockProps === null
+                            "
                             class="absolute z-50 pointer-events-none top-4 left-4"
                         >
                             <div class="flex gap-2">

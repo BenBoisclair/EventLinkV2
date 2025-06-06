@@ -26,6 +26,12 @@ const props = defineProps<
 
 const { colors } = useThemeColors(props.theme);
 
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
+    }
+    return props.backgroundColor || colors.value.backgroundPrimary;
+});
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const isDrawing = ref(false);
@@ -37,7 +43,7 @@ const saveError = ref<string | null>(null);
 // Dynamic theme-based color palette
 const availableColors = computed(() => [
     colors.value.themePrimary,
-    colors.value.themeSecondary, 
+    colors.value.themeSecondary,
     colors.value.themeAccent,
     "#FFB6C1", // Light Pink
     "#ADD8E6", // Baby Blue
@@ -47,7 +53,6 @@ const selectedColor = ref(availableColors.value[0]);
 const availableStrokeSizes = ref([1, 3, 5]); // Small, Medium, Large
 const selectedStrokeSize = ref(availableStrokeSizes.value[1]);
 // --- End New State ---
-
 
 const getContext = (): CanvasRenderingContext2D | null => {
     return canvasRef.value?.getContext("2d") || null;
@@ -227,11 +232,7 @@ watch(
 // Adjust listener functions to use global window.Echo
 const listenForCanvasUpdates = () => {
     // Check if window.Echo is available
-    if (
-        !props.id ||
-        typeof window === "undefined" ||
-        !window.Echo
-    ) {
+    if (!props.id || typeof window === "undefined" || !window.Echo) {
         return;
     }
 
@@ -285,15 +286,15 @@ const stopListeningForCanvasUpdates = () => {
             class="border cursor-crosshair"
             :style="{
                 touchAction: 'none',
-                backgroundColor: colors.backgroundPrimary,
-                borderColor: colors.borderColor
+                backgroundColor: blockBackgroundColor,
+                borderColor: colors.borderColor,
             }"
         ></canvas>
 
         <!-- Color & Size Controls -->
         <div class="absolute flex flex-col gap-2 left-2 top-2">
             <!-- Color Palette -->
-            <div 
+            <div
                 class="flex gap-1 p-1 rounded shadow"
                 :style="{ backgroundColor: colors.backgroundSecondary }"
             >
@@ -303,15 +304,10 @@ const stopListeningForCanvasUpdates = () => {
                     @click="selectedColor = color"
                     :style="{ backgroundColor: color }"
                     class="w-6 h-6 border-2 rounded-full"
-                    :style="{
-                        borderColor: selectedColor === color ? colors.themePrimary : colors.borderColor,
-                        boxShadow: selectedColor === color ? `0 0 0 2px ${colors.themePrimary}33` : 'none'
-                    }"
-                    class="border-2 rounded-full transition-all"
                 ></button>
             </div>
             <!-- Stroke Size Selector -->
-            <div 
+            <div
                 class="flex items-center gap-1 p-1 rounded shadow w-fit"
                 :style="{ backgroundColor: colors.backgroundSecondary }"
             >
@@ -319,11 +315,17 @@ const stopListeningForCanvasUpdates = () => {
                     v-for="size in availableStrokeSizes"
                     :key="size"
                     @click="selectedStrokeSize = size"
-                    class="flex items-center justify-center w-6 h-6 text-xs border-2 rounded transition-colors"
+                    class="flex items-center justify-center w-6 h-6 text-xs transition-colors border-2 rounded"
                     :style="{
-                        borderColor: selectedStrokeSize === size ? colors.themePrimary : colors.borderColor,
-                        backgroundColor: selectedStrokeSize === size ? colors.backgroundSecondary : colors.backgroundPrimary,
-                        color: colors.textPrimary
+                        borderColor:
+                            selectedStrokeSize === size
+                                ? colors.themePrimary
+                                : colors.borderColor,
+                        backgroundColor:
+                            selectedStrokeSize === size
+                                ? colors.backgroundSecondary
+                                : colors.backgroundPrimary,
+                        color: colors.textPrimary,
                     }"
                 >
                     {{ size }}px

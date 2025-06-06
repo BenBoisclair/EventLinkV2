@@ -3,7 +3,7 @@ import BlockContainer from "@/Components/WebsiteBuilder/Renderer/BlockContainer.
 import type { ExhibitorShowcaseBlockProps } from "@/types/blocks";
 import type { Exhibitor } from "@/types/exhibitor";
 import axios from "axios";
-import { onMounted, ref, watch, withDefaults } from "vue";
+import { computed, onMounted, ref, watch, withDefaults } from "vue";
 import { route } from "ziggy-js";
 import ExhibitorBannerDisplay from "../../../Exhibitor/ExhibitorBannerDisplay.vue";
 import ExhibitorCard from "../../../Exhibitor/ExhibitorCard.vue";
@@ -24,14 +24,16 @@ interface Props extends ExhibitorShowcaseBlockProps {
     };
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    title: "Meet Our Exhibitors",
-    event: undefined,
-});
+const props = withDefaults(defineProps<Props>(), {});
 
 const { colors } = useThemeColors(props.theme);
 
-
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
+    }
+    return props.backgroundColor || colors.value.backgroundPrimary;
+});
 
 const exhibitors = ref<Exhibitor[]>([]);
 const loading = ref(false);
@@ -56,7 +58,8 @@ const fetchExhibitors = async (eventId: number) => {
                 error.value = "Failed to load exhibitors.";
             }
         } else {
-            error.value = "An unexpected error occurred while fetching exhibitors.";
+            error.value =
+                "An unexpected error occurred while fetching exhibitors.";
         }
     } finally {
         loading.value = false;
@@ -85,16 +88,13 @@ watch(
     },
     { immediate: false }
 );
-
 </script>
 
 <template>
-    <BlockContainer
-        :background-color="colors.backgroundPrimary"
-    >
+    <BlockContainer :background-color="blockBackgroundColor">
         <div class="px-4 py-16 sm:px-6 lg:px-8">
             <BlockTitle
-                :title="props.title ?? ''"
+                :title="props.title || 'Meet Our Exhibitors'"
                 :title-color="colors.textPrimary"
                 default-classes="text-3xl font-bold"
                 text-align="center"
@@ -123,10 +123,7 @@ watch(
                     No exhibitors to display yet.
                 </div>
 
-                <div
-                    v-else
-                    class="grid grid-cols-3 gap-4"
-                >
+                <div v-else class="grid grid-cols-3 gap-4">
                     <ExhibitorCard
                         v-for="exhibitor in exhibitors"
                         :key="exhibitor.id"

@@ -6,7 +6,7 @@ import { ref, computed } from "vue";
 import draggable from "vuedraggable";
 
 const websiteBuilderStore = useWebsiteBuilderStore();
-const isOpen = ref(true);
+const isOpen = ref(false);
 const isDragging = ref(false);
 
 // Create a computed property for v-model binding with draggable

@@ -58,8 +58,8 @@ export async function saveWebsiteData(
                             if (typeof value === 'string' && value.startsWith('blob:')) {
                                 return;
                             }
-                            // Append other props as strings
-                            formData.append(`blocks[${index}][props][${key}]`, String(value));
+                            // Append other props, properly serialize complex objects
+                            formData.append(`blocks[${index}][props][${key}]`, typeof value === 'object' ? JSON.stringify(value) : String(value));
                         }
                     }
                 });

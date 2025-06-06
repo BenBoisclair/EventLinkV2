@@ -14,11 +14,18 @@ const props = withDefaults(defineProps<StatsBlockProps & {
 }>(), {});
 
 const { colors } = useThemeColors(props.theme);
+
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
+    }
+    return props.backgroundColor || colors.value.backgroundPrimary;
+});
 </script>
 
 <template>
     <BlockContainer
-        :background-color="colors.backgroundPrimary"
+        :background-color="blockBackgroundColor"
         class="py-12 md:py-16"
         :style="{ color: colors.textPrimary }"
     >

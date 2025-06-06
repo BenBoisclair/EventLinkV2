@@ -5,7 +5,8 @@ import Select from "@/Components/Forms/Select.vue";
 import Button from "@/Components/UI/Button.vue";
 import Checkbox from "@/Components/UI/Checkbox.vue";
 import IconButton from "@/Components/UI/IconButton.vue";
-import Section from "@/Components/UI/Section.vue";
+import Toggle from "@/Components/Forms/Toggle.vue";
+import ColorPalettePicker from "@/Components/UI/ColorPalettePicker.vue";
 import type { AttendeesFormBlockProps } from "@/types/blocks";
 import { useBlockEditor } from "@/Composables/useBlockEditor";
 import { ref, type PropType } from "vue";
@@ -90,30 +91,71 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
 
 <template>
     <div v-if="currentProps" class="flex flex-col h-full gap-5">
+        <div>
+            <InputLabel
+                value="Background Color"
+                class="mb-1 dark:text-dark-text-primary"
+            />
+            <div class="space-y-3">
+                <Toggle
+                    :model-value="currentProps.useThemeBackground ?? true"
+                    @update:model-value="
+                        (value) => {
+                            updateProperty('useThemeBackground', value);
+                            // If switching to custom color and no backgroundColor is set, provide a default
+                            if (!value && !currentProps.backgroundColor) {
+                                updateProperty('backgroundColor', '#3b82f6');
+                            }
+                        }
+                    "
+                    label="Use Theme Color"
+                />
+
+                <div v-if="currentProps.useThemeBackground === false">
+                    <ColorPalettePicker
+                        :model-value="currentProps.backgroundColor || '#3b82f6'"
+                        @update:model-value="
+                            updateProperty('backgroundColor', $event)
+                        "
+                        label="Custom Background Color"
+                        id="attendees-form-background-color"
+                        class="w-full h-10"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <InputLabel
+                value="Button Text"
+                class="mb-1 dark:text-dark-text-primary"
+            />
+            <Input
+                :model-value="currentProps.buttonText"
+                @update:model-value="updateProperty('buttonText', $event)"
+                class="w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
+            />
+        </div>
 
         <!-- Form Title -->
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
+        <div>
             <InputLabel
                 value="Form Title"
-                class="dark:text-dark-text-primary"
+                class="mb-1 dark:text-dark-text-primary"
             />
             <Input
                 :model-value="currentProps.title"
                 @update:model-value="updateProperty('title', $event)"
                 class="w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
             />
-        </Section>
+        </div>
 
         <!-- Form Fields -->
-        <Section
-            class="pr-2 mb-4 overflow-y-auto dark:bg-dark-surface shrink-0"
-        >
-            <div class="flex items-center justify-between mb-2">
-                <InputLabel
-                    value="Form Fields"
-                    class="font-medium dark:text-dark-text-primary"
-                />
-            </div>
+        <div>
+            <InputLabel
+                value="Form Fields"
+                class="mb-1 dark:text-dark-text-primary"
+            />
 
             <div class="space-y-2">
                 <div
@@ -123,7 +165,7 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
                 >
                     <!-- Field Header -->
                     <div
-                        class="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-surface-elevated"
+                        class="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-surface-elevated"
                         @click="toggleFieldExpansion(index)"
                     >
                         <div class="flex items-center space-x-2">
@@ -154,6 +196,7 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
                                 title="Delete field"
                                 variant="danger"
                                 size="sm"
+                                ariaLabel="Delete field"
                                 @click.stop="removeArrayItem('fields', index)"
                             />
                             <div
@@ -181,7 +224,7 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
                             <div>
                                 <InputLabel
                                     value="Field Name"
-                                    class="text-xs dark:text-dark-text-secondary"
+                                    class="mb-1 text-xs dark:text-dark-text-secondary"
                                 />
                                 <Input
                                     :model-value="field.name"
@@ -200,7 +243,7 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
                             <div>
                                 <InputLabel
                                     value="Field Label"
-                                    class="text-xs dark:text-dark-text-secondary"
+                                    class="mb-1 text-xs dark:text-dark-text-secondary"
                                 />
                                 <Input
                                     :model-value="field.label"
@@ -219,7 +262,7 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
                         <div>
                             <InputLabel
                                 value="Field Type"
-                                class="text-xs dark:text-dark-text-secondary"
+                                class="mb-1 text-xs dark:text-dark-text-secondary"
                             />
                             <Select
                                 :model-value="field.type"
@@ -241,7 +284,7 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
                         >
                             <InputLabel
                                 value="Options"
-                                class="mb-2 text-xs dark:text-dark-text-secondary"
+                                class="mb-1 text-xs dark:text-dark-text-secondary"
                             />
                             <div class="space-y-2">
                                 <div
@@ -309,27 +352,15 @@ const removeOption = (fieldIndex: number, optionIndex: number) => {
                         </div>
                     </div>
                 </div>
-
-                <Button
-                    text="Add Field"
-                    variant="outline-secondary"
-                    size="xs"
-                    @click="addFormField"
-                />
+                <div class="flex mt-2">
+                    <Button
+                        text="Add Field"
+                        variant="outline-primary"
+                        @click="addFormField"
+                        class="w-full py-1 text-sm"
+                    />
+                </div>
             </div>
-        </Section>
-
-        <!-- Button Settings -->
-        <Section class="flex-shrink-0 space-y-2 dark:bg-dark-surface">
-            <InputLabel
-                value="Button Text"
-                class="dark:text-dark-text-primary"
-            />
-            <Input
-                :model-value="currentProps.buttonText"
-                @update:model-value="updateProperty('buttonText', $event)"
-                class="w-full dark:bg-dark-surface-elevated dark:border-dark-border dark:text-dark-text-primary"
-            />
-        </Section>
+        </div>
     </div>
 </template>

@@ -1,7 +1,20 @@
 <template>
-    <div class="w-full h-px dark:bg-dark-border bg-border"></div>
+    <div
+        class="w-full h-px dark:bg-dark-border bg-border"
+        :class="class"
+        :style="{ height: `${size}px` }"
+    ></div>
 </template>
 
 <script setup>
-// Spacer component that renders a 1px horizontal line
+defineProps({
+    size: {
+        type: Number,
+        default: 1,
+    },
+    class: {
+        type: String,
+        default: "",
+    },
+});
 </script>

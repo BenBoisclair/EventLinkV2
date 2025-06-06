@@ -35,24 +35,17 @@ const props = withDefaults(
             };
         }
     >(),
-    {
-        title: "Countdown",
-        startDate: undefined,
-        endDate: undefined,
-        useEventDates: false,
-        event: undefined,
-        showDays: true,
-        showHours: true,
-        showMinutes: true,
-        showSeconds: true,
-        finishedText: "Event has started! 🎉",
-        buttonText: "",
-        buttonLink: "",
-        buttonEnabled: false,
-    }
+    {}
 );
 
 const { colors } = useThemeColors(props.theme);
+
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
+    }
+    return props.backgroundColor || colors.value.backgroundPrimary;
+});
 
 const unitBackgroundStyle = computed(() => ({
     backgroundColor: colors.value.backgroundSecondary,
@@ -109,7 +102,6 @@ const calculateTimeLeft = () => {
     }
 };
 
-
 onMounted(() => {
     calculateTimeLeft();
     countdownInterval = window.setInterval(calculateTimeLeft, 1000);
@@ -135,7 +127,7 @@ watch(
 
 <template>
     <BlockContainer
-        :background-color="colors.backgroundPrimary"
+        :background-color="blockBackgroundColor"
         class="flex min-h-[300px] flex-col items-center justify-center"
     >
         <div

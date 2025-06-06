@@ -16,30 +16,18 @@ const props = withDefaults(
             };
         }
     >(),
-    {
-        textPosition: "middle",
-        overlayEnabled: false,
-        theme: () => ({
-            primary: '#3b82f6',
-            secondary: '#64748b',
-            accent: '#f59e0b',
-            background: '#ffffff'
-        })
-    }
+    {}
 );
 
-// Use theme colors composable - will use props if provided, otherwise falls back to store
 const { colors, utils } = useThemeColors(props.theme);
-
-
 
 const showImage = computed(() => !!props.imageUrl);
 
-const backgroundStyle = computed(() => {
-    if (!showImage.value) {
-        return { backgroundColor: colors.value.backgroundPrimary };
+const blockBackgroundColor = computed(() => {
+    if (props.useThemeBackground !== false) {
+        return colors.value.backgroundPrimary;
     }
-    return {};
+    return props.backgroundColor || colors.value.backgroundPrimary;
 });
 
 const textPositionClasses = computed(() => {
@@ -67,7 +55,6 @@ const textAlignClasses = computed(() => {
 
 const overlayStyle = computed(() => {
     if (!props.overlayEnabled) return {};
-    // Always apply 40% opacity using theme primary color
     const color = utils.addAlpha(colors.value.themePrimary, 0.4);
     return { backgroundColor: color };
 });
@@ -75,25 +62,22 @@ const overlayStyle = computed(() => {
 const textStyles = computed(() => {
     const hasImage = showImage.value;
     return {
-        heading: { 
-            color: hasImage ? "#FFFFFF" : colors.value.textPrimary 
+        heading: {
+            color: hasImage ? "#FFFFFF" : colors.value.textPrimary,
         },
-        description: { 
-            color: hasImage ? "#FFFFFF" : colors.value.textSecondary 
-        }
+        description: {
+            color: hasImage ? "#FFFFFF" : colors.value.textSecondary,
+        },
     };
 });
 </script>
 
 <template>
     <BlockContainer
-        :background-color="showImage ? 'transparent' : colors.backgroundPrimary"
+        :background-color="showImage ? 'transparent' : blockBackgroundColor"
         class="relative p-0"
     >
-        <div
-            class="relative aspect-[16/9] w-full overflow-hidden"
-            :style="backgroundStyle"
-        >
+        <div class="relative aspect-[16/9] w-full overflow-hidden">
             <img
                 v-if="showImage"
                 :src="props.imageUrl ?? ''"
@@ -111,7 +95,6 @@ const textStyles = computed(() => {
                 class="absolute inset-0 w-full h-full"
                 :style="overlayStyle"
             ></div>
-
 
             <div
                 v-if="props.headingText || props.descriptionText"
